@@ -4,13 +4,19 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.utils.http import url_has_allowed_host_and_scheme
-from django.urls import resolve, Resolver404
+from django.urls import resolve, reverse, Resolver404, NoReverseMatch
+from django.http import HttpResponseRedirect
 from django.contrib import messages
+from urllib.parse import urlparse
 from .forms import SignUpForm, ProfileEditForm
 
 
-def _safe_next_url(request):
-    """Return a safe local-only redirect target from the 'next' GET param."""
+def _get_safe_redirect(request):
+    """
+    Return a safe internal redirect URL from the 'next' GET parameter,
+    or None if the URL is invalid or external.
+    The taint chain is broken by reconstructing the URL via reverse().
+    """
     next_url = request.GET.get(REDIRECT_FIELD_NAME, '')
     if not next_url:
         return None
@@ -20,14 +26,14 @@ def _safe_next_url(request):
         require_https=request.is_secure(),
     ):
         return None
-    # Resolve only the path portion to prevent open redirects
-    from urllib.parse import urlparse
     path = urlparse(next_url).path
     try:
-        resolve(path)
-    except Resolver404:
+        match = resolve(path)
+        # Reconstruct from the URL pattern registry — breaks the user-input taint chain
+        clean_url = reverse(match.view_name, args=match.args, kwargs=match.kwargs)
+        return clean_url
+    except (Resolver404, NoReverseMatch):
         return None
-    return path or None
 
 
 class BootstrapAuthForm(AuthenticationForm):
@@ -59,8 +65,10 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
             messages.success(request, f'{user.username}님 환영합니다!')
-            safe_url = _safe_next_url(request)
-            return redirect(safe_url if safe_url else 'home')
+            clean_url = _get_safe_redirect(request)
+            if clean_url:
+                return HttpResponseRedirect(clean_url)
+            return redirect('home')
     else:
         form = BootstrapAuthForm()
     return render(request, 'accounts/login.html', {'form': form})
