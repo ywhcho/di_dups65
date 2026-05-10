@@ -28,7 +28,12 @@ pip install django mysqlclient python-dotenv
 
 #### MySQL (운영 환경)
 
-프로젝트 루트에 `.env` 파일을 만들고 아래 내용을 설정하세요:
+기본 설정은 루트의 `config.env` 파일에 포함되어 있습니다.
+
+- 공통 기본값: `config.env`
+- 로컬/개인 설정 오버라이드: `.env` (선택)
+
+`.env` 파일을 추가하면 `config.env` 값을 덮어쓸 수 있습니다:
 
 ```env
 USE_MYSQL=True
