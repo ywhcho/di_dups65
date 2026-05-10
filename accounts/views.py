@@ -4,8 +4,30 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.urls import resolve, Resolver404
 from django.contrib import messages
 from .forms import SignUpForm, ProfileEditForm
+
+
+def _safe_next_url(request):
+    """Return a safe local-only redirect target from the 'next' GET param."""
+    next_url = request.GET.get(REDIRECT_FIELD_NAME, '')
+    if not next_url:
+        return None
+    if not url_has_allowed_host_and_scheme(
+        url=next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return None
+    # Resolve only the path portion to prevent open redirects
+    from urllib.parse import urlparse
+    path = urlparse(next_url).path
+    try:
+        resolve(path)
+    except Resolver404:
+        return None
+    return path or None
 
 
 class BootstrapAuthForm(AuthenticationForm):
@@ -37,14 +59,8 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
             messages.success(request, f'{user.username}님 환영합니다!')
-            next_url = request.GET.get(REDIRECT_FIELD_NAME, '')
-            if next_url and url_has_allowed_host_and_scheme(
-                url=next_url,
-                allowed_hosts={request.get_host()},
-                require_https=request.is_secure(),
-            ):
-                return redirect(next_url)
-            return redirect('home')
+            safe_url = _safe_next_url(request)
+            return redirect(safe_url if safe_url else 'home')
     else:
         form = BootstrapAuthForm()
     return render(request, 'accounts/login.html', {'form': form})
