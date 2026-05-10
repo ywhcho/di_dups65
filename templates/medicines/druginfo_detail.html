@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}{{ drug.htname }} - 의약정보{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'medicines:druginfo_list' %}">의약정보 보기</a></li>
+    <li class="breadcrumb-item active">{{ drug.htname }}</li>
+  </ol>
+</nav>
+
+<div class="card shadow-sm">
+  <div class="card-header bg-primary text-white">
+    <h4 class="mb-0"><i class="bi bi-capsule"></i> {{ drug.htname }}</h4>
+  </div>
+  <div class="card-body">
+    <table class="table table-bordered">
+      <tbody>
+        <tr>
+          <th class="table-secondary" style="width: 150px;">약품명</th>
+          <td><strong>{{ drug.htname }}</strong></td>
+        </tr>
+        <tr>
+          <th class="table-secondary">성분명</th>
+          <td>{{ drug.ingred }}</td>
+        </tr>
+        <tr>
+          <th class="table-secondary">회사명</th>
+          <td>{{ drug.company }}</td>
+        </tr>
+        <tr>
+          <th class="table-secondary">효능</th>
+          <td>{{ drug.ee|linebreaksbr }}</td>
+        </tr>
+        <tr>
+          <th class="table-secondary">용량</th>
+          <td>{{ drug.ud|linebreaksbr }}</td>
+        </tr>
+        <tr>
+          <th class="table-secondary">주의사항</th>
+          <td>{{ drug.nb|linebreaksbr }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <a href="{% url 'medicines:druginfo_list' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> 목록으로
+    </a>
+  </div>
+</div>
+{% endblock %}

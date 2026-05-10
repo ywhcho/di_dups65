@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% block title %}의약품 중복성분 보기{% endblock %}
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-search-heart text-danger"></i> 의약품 중복성분 보기</h2>
+
+<div class="row g-4">
+  <!-- 검색 영역 -->
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header bg-danger text-white">
+        <h5 class="mb-0"><i class="bi bi-search"></i> 약품명 검색</h5>
+      </div>
+      <div class="card-body">
+        <form method="get" action="">
+          <div class="input-group mb-3">
+            <input type="text" name="q" class="form-control" placeholder="약품명을 입력하세요"
+                   value="{{ query }}" autofocus>
+            <button class="btn btn-danger" type="submit"><i class="bi bi-search"></i> 검색</button>
+          </div>
+        </form>
+
+        {% if search_results %}
+          <h6 class="text-muted">검색 결과</h6>
+          <div class="list-group">
+            {% for med in search_results %}
+              <div class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ med.htname }}</span>
+                <form method="post" action="?q={{ query }}">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="add">
+                  <input type="hidden" name="medicine_name" value="{{ med.htname }}">
+                  <button type="submit" class="btn btn-sm btn-outline-success">
+                    <i class="bi bi-plus-circle"></i> 추가
+                  </button>
+                </form>
+              </div>
+            {% endfor %}
+          </div>
+        {% elif query %}
+          <div class="alert alert-warning">검색 결과가 없습니다.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- 선택 목록 -->
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-list-check"></i> 선택된 약품 목록 ({{ selected|length }}개)</h5>
+        {% if selected %}
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="clear">
+            <button type="submit" class="btn btn-sm btn-light">전체 삭제</button>
+          </form>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        {% if selected %}
+          <ul class="list-group mb-3">
+            {% for med_name in selected_page %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-capsule text-primary"></i> {{ med_name }}</span>
+                <form method="post" action="?q={{ query }}&spage={{ selected_page.number }}">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="remove">
+                  <input type="hidden" name="medicine_name" value="{{ med_name }}">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-trash"></i> 삭제
+                  </button>
+                </form>
+              </li>
+            {% endfor %}
+          </ul>
+
+          <!-- 페이지네이션 -->
+          {% if selected_page.has_other_pages %}
+            <nav>
+              <ul class="pagination pagination-sm justify-content-center">
+                {% if selected_page.has_previous %}
+                  <li class="page-item">
+                    <a class="page-link" href="?q={{ query }}&spage={{ selected_page.previous_page_number }}">이전</a>
+                  </li>
+                {% endif %}
+                <li class="page-item active">
+                  <span class="page-link">{{ selected_page.number }} / {{ selected_page.paginator.num_pages }}</span>
+                </li>
+                {% if selected_page.has_next %}
+                  <li class="page-item">
+                    <a class="page-link" href="?q={{ query }}&spage={{ selected_page.next_page_number }}">다음</a>
+                  </li>
+                {% endif %}
+              </ul>
+            </nav>
+          {% endif %}
+
+          <!-- 중복성분보기 버튼 -->
+          <div class="text-center mt-3">
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="compare">
+              <button type="submit" class="btn btn-danger btn-lg w-100">
+                <i class="bi bi-search-heart"></i> 중복성분보기
+              </button>
+            </form>
+          </div>
+        {% else %}
+          <div class="text-muted text-center py-4">
+            <i class="bi bi-inbox fs-1"></i>
+            <p class="mt-2">선택된 약품이 없습니다.<br>왼쪽에서 약품을 검색하여 추가하세요.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 비교 결과 -->
+{% if comparison_result %}
+  <div class="mt-5">
+    <h3 class="mb-3"><i class="bi bi-clipboard2-pulse text-danger"></i> 성분 비교 결과</h3>
+    {% if comparison_result.error %}
+      <div class="alert alert-warning">{{ comparison_result.error }}</div>
+    {% else %}
+      <!-- 약품별 성분 표 -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header"><h5 class="mb-0">약품별 성분 목록</h5></div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead class="table-secondary">
+                <tr>
+                  <th>약품명</th>
+                  <th>성분</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for name, ingreds in comparison_result.medicines_data.items %}
+                  <tr>
+                    <td><strong>{{ name }}</strong></td>
+                    <td>{{ ingreds|join:", " }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 중복 성분 -->
+      {% if comparison_result.has_duplicates %}
+        <div class="alert alert-danger">
+          <h5><i class="bi bi-exclamation-triangle-fill"></i> ⚠️ 중복 성분이 발견되었습니다!</h5>
+          <ul class="mb-0 mt-2">
+            {% for ingred, names in comparison_result.duplicate_ingreds.items %}
+              <li><strong>{{ ingred }}</strong> — {{ names|join:", " }}에서 공통으로 포함</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% else %}
+        <div class="alert alert-success">
+          <h5><i class="bi bi-check-circle-fill"></i> 중복 성분이 없습니다.</h5>
+          <p class="mb-0">선택된 약품들은 서로 다른 성분으로 구성되어 있습니다.</p>
+        </div>
+      {% endif %}
+
+      <!-- 개별 성분 -->
+      {% if comparison_result.unique_ingreds %}
+        <div class="card shadow-sm">
+          <div class="card-header bg-light"><h6 class="mb-0">각 약품 고유 성분</h6></div>
+          <div class="card-body">
+            <ul class="list-group list-group-flush">
+              {% for ingred, names in comparison_result.unique_ingreds.items %}
+                <li class="list-group-item">
+                  <span class="badge bg-secondary">{{ names|join:", " }}</span>
+                  {{ ingred }}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}게시글 {{ action }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h4 class="mb-0"><i class="bi bi-pencil-square"></i> 게시글 {{ action }}</h4>
+      </div>
+      <div class="card-body p-4">
+        <form method="post">
+          {% csrf_token %}
+          {% for field in form %}
+            <div class="mb-3">
+              <label class="form-label fw-semibold">{{ field.label }}</label>
+              {{ field }}
+              {% if field.errors %}
+                <div class="text-danger small mt-1">{{ field.errors.0 }}</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success">
+              <i class="bi bi-check-lg"></i> {{ action }}
+            </button>
+            {% if post %}
+              <a href="{% url 'board:post_detail' post.pk %}" class="btn btn-outline-secondary">취소</a>
+            {% else %}
+              <a href="{% url 'board:post_list' %}" class="btn btn-outline-secondary">취소</a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

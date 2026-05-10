@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'board:post_list' %}">게시판</a></li>
+    <li class="breadcrumb-item active">{{ post.title }}</li>
+  </ol>
+</nav>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-header">
+    <h4 class="mb-0">{{ post.title }}</h4>
+    <small class="text-muted">
+      {{ post.author.username }} | {{ post.created_at|date:"Y년 m월 d일 H:i" }}
+      {% if post.updated_at != post.created_at %}
+        (수정: {{ post.updated_at|date:"Y-m-d H:i" }})
+      {% endif %}
+    </small>
+  </div>
+  <div class="card-body">
+    <div style="min-height: 200px; white-space: pre-wrap;">{{ post.content }}</div>
+  </div>
+  <div class="card-footer d-flex gap-2">
+    <a href="{% url 'board:post_list' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-list"></i> 목록
+    </a>
+    {% if user == post.author %}
+      <a href="{% url 'board:post_edit' post.pk %}" class="btn btn-outline-primary">
+        <i class="bi bi-pencil"></i> 수정
+      </a>
+      <form method="post" action="{% url 'board:post_delete' post.pk %}" class="d-inline"
+            onsubmit="return confirm('정말 삭제하시겠습니까?')">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-danger">
+          <i class="bi bi-trash"></i> 삭제
+        </button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
