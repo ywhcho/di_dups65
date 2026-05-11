@@ -84,7 +84,8 @@ python manage.py runserver
 ```
 di_dups65/
 ├── medsite/          # 프로젝트 설정
-├── medicines/        # 의약품 중복성분 / 의약정보 앱
+├── medicines/        # 의약정보 앱
+├── med_dup/          # 의약품 중복성분 앱
 ├── accounts/         # 회원 기능 앱
 ├── board/            # 게시판 앱
 ├── templates/        # HTML 템플릿
