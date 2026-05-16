@@ -116,7 +116,7 @@ def compare_ingredients(selected_names):
                     }
             medicines_data[name] = sorted(
                 [
-                    f"{ingredient} :{data['dose_display']}" if data['dose_display'] else ingredient
+                    f"{ingredient}:{data['dose_display']}" if data['dose_display'] else ingredient
                     for ingredient, data in ingreds.items()
                 ]
             )
