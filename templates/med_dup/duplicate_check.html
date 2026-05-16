@@ -19,13 +19,13 @@
           </div>
         </form>
 
-        {% if search_results %}
+        {% if search_page and search_page.object_list %}
           <h6 class="text-muted">검색 결과</h6>
           <div class="list-group">
-            {% for med in search_results %}
+            {% for med in search_page %}
               <div class="list-group-item d-flex justify-content-between align-items-center">
                 <span>{{ med.htname }}</span>
-                <form method="post" action="?q={{ query }}">
+                <form method="post" action="?q={{ query|urlencode }}&qpage={{ search_page.number }}">
                   {% csrf_token %}
                   <input type="hidden" name="action" value="add">
                   <input type="hidden" name="medicine_name" value="{{ med.htname }}">
@@ -36,6 +36,26 @@
               </div>
             {% endfor %}
           </div>
+
+          {% if search_page.has_other_pages %}
+            <nav class="mt-3">
+              <ul class="pagination pagination-sm justify-content-center">
+                {% if search_page.has_previous %}
+                  <li class="page-item">
+                    <a class="page-link" href="?q={{ query|urlencode }}&qpage={{ search_page.previous_page_number }}&spage={{ selected_page.number }}">이전</a>
+                  </li>
+                {% endif %}
+                <li class="page-item active">
+                  <span class="page-link">{{ search_page.number }} / {{ search_page.paginator.num_pages }}</span>
+                </li>
+                {% if search_page.has_next %}
+                  <li class="page-item">
+                    <a class="page-link" href="?q={{ query|urlencode }}&qpage={{ search_page.next_page_number }}&spage={{ selected_page.number }}">다음</a>
+                  </li>
+                {% endif %}
+              </ul>
+            </nav>
+          {% endif %}
         {% elif query %}
           <div class="alert alert-warning">검색 결과가 없습니다.</div>
         {% endif %}
@@ -62,7 +82,7 @@
             {% for med_name in selected_page %}
               <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-capsule text-primary"></i> {{ med_name }}</span>
-                <form method="post" action="?q={{ query }}&spage={{ selected_page.number }}">
+                <form method="post" action="?q={{ query|urlencode }}&qpage={% if search_page %}{{ search_page.number }}{% else %}1{% endif %}&spage={{ selected_page.number }}">
                   {% csrf_token %}
                   <input type="hidden" name="action" value="remove">
                   <input type="hidden" name="medicine_name" value="{{ med_name }}">
@@ -80,7 +100,7 @@
               <ul class="pagination pagination-sm justify-content-center">
                 {% if selected_page.has_previous %}
                   <li class="page-item">
-                    <a class="page-link" href="?q={{ query }}&spage={{ selected_page.previous_page_number }}">이전</a>
+                    <a class="page-link" href="?q={{ query|urlencode }}&qpage={% if search_page %}{{ search_page.number }}{% else %}1{% endif %}&spage={{ selected_page.previous_page_number }}">이전</a>
                   </li>
                 {% endif %}
                 <li class="page-item active">
@@ -88,7 +108,7 @@
                 </li>
                 {% if selected_page.has_next %}
                   <li class="page-item">
-                    <a class="page-link" href="?q={{ query }}&spage={{ selected_page.next_page_number }}">다음</a>
+                    <a class="page-link" href="?q={{ query|urlencode }}&qpage={% if search_page %}{{ search_page.number }}{% else %}1{% endif %}&spage={{ selected_page.next_page_number }}">다음</a>
                   </li>
                 {% endif %}
               </ul>
@@ -153,8 +173,15 @@
         <div class="alert alert-danger">
           <h5><i class="bi bi-exclamation-triangle-fill"></i> ⚠️ 중복 성분이 발견되었습니다!</h5>
           <ul class="mb-0 mt-2">
-            {% for ingred, names in comparison_result.duplicate_ingreds.items %}
-              <li><strong>{{ ingred }}</strong> — {{ names|join:", " }}에서 공통으로 포함</li>
+            {% for item in comparison_result.duplicate_ingreds %}
+              <li class="mb-2">
+                <strong>{{ item.ingredient }}</strong> ({{ item.count }}개) 함량계: {{ item.total_dose }}
+                <ul class="mt-1 mb-0">
+                  {% for detail in item.details %}
+                    <li>{{ detail.medicine }} {{ detail.dose }}</li>
+                  {% endfor %}
+                </ul>
+              </li>
             {% endfor %}
           </ul>
         </div>
@@ -165,22 +192,6 @@
         </div>
       {% endif %}
 
-      <!-- 개별 성분 -->
-      {% if comparison_result.unique_ingreds %}
-        <div class="card shadow-sm">
-          <div class="card-header bg-light"><h6 class="mb-0">각 약품 고유 성분</h6></div>
-          <div class="card-body">
-            <ul class="list-group list-group-flush">
-              {% for ingred, names in comparison_result.unique_ingreds.items %}
-                <li class="list-group-item">
-                  <span class="badge bg-secondary">{{ names|join:", " }}</span>
-                  {{ ingred }}
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
-      {% endif %}
     {% endif %}
   </div>
 {% endif %}
