@@ -19,13 +19,15 @@
   </div>
 </form>
 
-{% if search_q %}
-  <div class="alert alert-info">
+<div class="alert alert-info">
+  {% if search_q %}
     검색 조건:
     <span class="badge bg-primary">{{ search_field_label }}: {{ search_q }}</span>
-    &mdash; 총 {{ page_obj.paginator.count }}개 결과
-  </div>
-{% endif %}
+  {% else %}
+    전체 목록
+  {% endif %}
+  &mdash; 총 {{ page_obj.paginator.count }}개 결과
+</div>
 
 <div class="table-responsive">
   <table class="table table-hover table-bordered">
@@ -66,17 +68,17 @@
     <ul class="pagination justify-content-center">
       {% if page_obj.has_previous %}
         <li class="page-item">
-          <a class="page-link" href="?field={{ search_field }}&q={{ search_q }}&page={{ page_obj.previous_page_number }}">이전</a>
+          <a class="page-link" href="?field={{ search_field|urlencode }}&q={{ search_q|urlencode }}&page={{ page_obj.previous_page_number }}">이전</a>
         </li>
       {% endif %}
       {% for num in page_obj.paginator.page_range %}
         <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-          <a class="page-link" href="?field={{ search_field }}&q={{ search_q }}&page={{ num }}">{{ num }}</a>
+          <a class="page-link" href="?field={{ search_field|urlencode }}&q={{ search_q|urlencode }}&page={{ num }}">{{ num }}</a>
         </li>
       {% endfor %}
       {% if page_obj.has_next %}
         <li class="page-item">
-          <a class="page-link" href="?field={{ search_field }}&q={{ search_q }}&page={{ page_obj.next_page_number }}">다음</a>
+          <a class="page-link" href="?field={{ search_field|urlencode }}&q={{ search_q|urlencode }}&page={{ page_obj.next_page_number }}">다음</a>
         </li>
       {% endif %}
     </ul>
