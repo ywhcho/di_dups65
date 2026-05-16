@@ -3,72 +3,15 @@
 {% block content %}
 <h2 class="mb-4"><i class="bi bi-journal-medical text-primary"></i> 의약정보 보기</h2>
 
-<div class="row g-3 mb-4">
-  <!-- 성분별 검색 -->
-  <div class="col-md-4">
-    <div class="card shadow-sm h-100">
-      <div class="card-header bg-primary text-white"><h6 class="mb-0"><i class="bi bi-eyedropper"></i> 성분별 검색</h6></div>
-      <div class="card-body">
-        <form method="get" action="">
-          <select name="ingred" class="form-select form-select-sm mb-2" onchange="this.form.submit()">
-            <option value="">-- 성분 선택 --</option>
-            {% for ing in all_ingreds %}
-              <option value="{{ ing }}" {% if ing == ingred_filter %}selected{% endif %}>{{ ing }}</option>
-            {% endfor %}
-          </select>
-        </form>
-        {% if ingred_filter %}
-          <a href="?" class="btn btn-sm btn-outline-secondary">필터 초기화</a>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-
-  <!-- 회사별 검색 -->
-  <div class="col-md-4">
-    <div class="card shadow-sm h-100">
-      <div class="card-header bg-success text-white"><h6 class="mb-0"><i class="bi bi-building"></i> 회사별 검색</h6></div>
-      <div class="card-body">
-        <form method="get" action="">
-          <select name="company" class="form-select form-select-sm mb-2" onchange="this.form.submit()">
-            <option value="">-- 회사 선택 --</option>
-            {% for comp in all_companies %}
-              <option value="{{ comp }}" {% if comp == company_filter %}selected{% endif %}>{{ comp }}</option>
-            {% endfor %}
-          </select>
-        </form>
-        {% if company_filter %}
-          <a href="?" class="btn btn-sm btn-outline-secondary">필터 초기화</a>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-
-  <!-- 효능별 검색 -->
-  <div class="col-md-4">
-    <div class="card shadow-sm h-100">
-      <div class="card-header bg-warning"><h6 class="mb-0"><i class="bi bi-heart-pulse"></i> 효능별 검색</h6></div>
-      <div class="card-body">
-        <form method="get" action="">
-          <select name="ee" class="form-select form-select-sm mb-2" onchange="this.form.submit()">
-            <option value="">-- 효능 선택 --</option>
-            {% for e in all_ee %}
-              <option value="{{ e }}" {% if e == ee_filter %}selected{% endif %}>{{ e }}</option>
-            {% endfor %}
-          </select>
-        </form>
-        {% if ee_filter %}
-          <a href="?" class="btn btn-sm btn-outline-secondary">필터 초기화</a>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 약품명 직접 검색 -->
 <form method="get" action="" class="mb-4">
   <div class="input-group">
-    <input type="text" name="q" class="form-control" placeholder="약품명으로 검색" value="{{ search_q }}">
+    <select name="field" class="form-select" style="max-width: 180px;">
+      <option value="htname" {% if search_field == 'htname' %}selected{% endif %}>약품명</option>
+      <option value="ingred" {% if search_field == 'ingred' %}selected{% endif %}>성분</option>
+      <option value="company" {% if search_field == 'company' %}selected{% endif %}>회사</option>
+      <option value="ee" {% if search_field == 'ee' %}selected{% endif %}>효능</option>
+    </select>
+    <input type="text" name="q" class="form-control" placeholder="검색어를 입력하세요" value="{{ search_q }}">
     <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> 검색</button>
     {% if search_q %}
       <a href="?" class="btn btn-outline-secondary">초기화</a>
@@ -76,14 +19,10 @@
   </div>
 </form>
 
-<!-- 검색 결과 -->
-{% if ingred_filter or company_filter or ee_filter or search_q %}
+{% if search_q %}
   <div class="alert alert-info">
     검색 조건:
-    {% if search_q %}<span class="badge bg-primary">약품명: {{ search_q }}</span>{% endif %}
-    {% if ingred_filter %}<span class="badge bg-primary">성분: {{ ingred_filter }}</span>{% endif %}
-    {% if company_filter %}<span class="badge bg-success">회사: {{ company_filter }}</span>{% endif %}
-    {% if ee_filter %}<span class="badge bg-warning text-dark">효능: {{ ee_filter }}</span>{% endif %}
+    <span class="badge bg-primary">{{ search_field_label }}: {{ search_q }}</span>
     &mdash; 총 {{ page_obj.paginator.count }}개 결과
   </div>
 {% endif %}
@@ -127,17 +66,17 @@
     <ul class="pagination justify-content-center">
       {% if page_obj.has_previous %}
         <li class="page-item">
-          <a class="page-link" href="?q={{ search_q }}&ingred={{ ingred_filter }}&company={{ company_filter }}&ee={{ ee_filter }}&page={{ page_obj.previous_page_number }}">이전</a>
+          <a class="page-link" href="?field={{ search_field }}&q={{ search_q }}&page={{ page_obj.previous_page_number }}">이전</a>
         </li>
       {% endif %}
       {% for num in page_obj.paginator.page_range %}
         <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-          <a class="page-link" href="?q={{ search_q }}&ingred={{ ingred_filter }}&company={{ company_filter }}&ee={{ ee_filter }}&page={{ num }}">{{ num }}</a>
+          <a class="page-link" href="?field={{ search_field }}&q={{ search_q }}&page={{ num }}">{{ num }}</a>
         </li>
       {% endfor %}
       {% if page_obj.has_next %}
         <li class="page-item">
-          <a class="page-link" href="?q={{ search_q }}&ingred={{ ingred_filter }}&company={{ company_filter }}&ee={{ ee_filter }}&page={{ page_obj.next_page_number }}">다음</a>
+          <a class="page-link" href="?field={{ search_field }}&q={{ search_q }}&page={{ page_obj.next_page_number }}">다음</a>
         </li>
       {% endif %}
     </ul>
