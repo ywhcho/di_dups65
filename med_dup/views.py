@@ -3,6 +3,13 @@ from django.shortcuts import render
 from medicines.models import Medicine
 import re
 
+MASS_UNIT_FACTORS_TO_MCG = {
+    'kg': 1_000_000_000,
+    'g': 1_000_000,
+    'mg': 1_000,
+    'mcg': 1,
+}
+
 
 def duplicate_check(request):
     """의약품 중복성분 보기"""
@@ -92,6 +99,44 @@ def _parse_ingredient_entry(entry):
     return ingredient, dose_display, dose_value, dose_unit
 
 
+def _normalize_mass_unit(unit):
+    normalized = (unit or '').strip().lower().replace('μ', 'u')
+    if normalized in {'mcg', 'ug'}:
+        return 'mcg'
+    if normalized in {'mg', 'g', 'kg'}:
+        return normalized
+    return None
+
+
+def _format_total_dose(amounts):
+    mass_amounts = []
+    other_totals = {}
+
+    for amount in amounts:
+        value = amount['value']
+        unit = amount['unit']
+        mass_unit = _normalize_mass_unit(unit)
+        if mass_unit:
+            mass_amounts.append((value, mass_unit))
+        else:
+            other_totals[unit] = other_totals.get(unit, 0.0) + value
+
+    parts = []
+    if mass_amounts:
+        target_unit = min(
+            {unit for _, unit in mass_amounts},
+            key=lambda unit: MASS_UNIT_FACTORS_TO_MCG[unit],
+        )
+        total_mcg = sum(value * MASS_UNIT_FACTORS_TO_MCG[unit] for value, unit in mass_amounts)
+        total_value = total_mcg / MASS_UNIT_FACTORS_TO_MCG[target_unit]
+        parts.append(f"{total_value:g}{target_unit}")
+
+    for unit, total in sorted(other_totals.items()):
+        parts.append(f"{total:g}{unit}")
+
+    return ' + '.join(parts) if parts else '-'
+
+
 def compare_ingredients(selected_names):
     """선택된 약품들의 성분 비교"""
     if len(selected_names) < 2:
@@ -122,7 +167,7 @@ def compare_ingredients(selected_names):
             )
 
             for ingredient, dose_data in ingreds.items():
-                usage = ingredient_usage.setdefault(ingredient, {'details': [], 'totals': {}})
+                usage = ingredient_usage.setdefault(ingredient, {'details': [], 'amounts': []})
                 detail = {
                     'medicine': name,
                     'dose': dose_data['dose_display'] or '-',
@@ -130,8 +175,12 @@ def compare_ingredients(selected_names):
                 usage['details'].append(detail)
 
                 if dose_data['dose_value'] is not None and dose_data['dose_unit']:
-                    unit_total = usage['totals'].setdefault(dose_data['dose_unit'], 0.0)
-                    usage['totals'][dose_data['dose_unit']] = unit_total + dose_data['dose_value']
+                    usage['amounts'].append(
+                        {
+                            'value': dose_data['dose_value'],
+                            'unit': dose_data['dose_unit'],
+                        }
+                    )
 
     if len(medicines_data) < 2:
         return {'error': '선택된 약품의 데이터를 찾을 수 없습니다.'}
@@ -142,12 +191,7 @@ def compare_ingredients(selected_names):
         if len(details) < 2:
             continue
 
-        if usage['totals']:
-            total_dose = ' + '.join(
-                f"{total:g}{unit}" for unit, total in sorted(usage['totals'].items())
-            )
-        else:
-            total_dose = '-'
+        total_dose = _format_total_dose(usage['amounts'])
 
         duplicate_ingreds.append(
             {
