@@ -76,6 +76,7 @@ def _split_ingredient_entries(raw_ingred):
 
 def _parse_dose_info(dose_text):
     cleaned = (dose_text or '').strip().replace('/', '')
+    cleaned = re.sub(r'(?<=\d),(?=\d)', '', cleaned)
     match = re.search(r'(\d+(?:\.\d+)?)\s*([^\d\s]+)?', cleaned)
     if not match:
         return cleaned, None, None
