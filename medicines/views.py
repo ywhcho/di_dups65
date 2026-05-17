@@ -23,9 +23,11 @@ def druginfo_list(request):
     if search_q:
         filter_field = field_map[search_field][0]
         drugs = drugs.filter(**{f'{filter_field}__icontains': search_q})
+    else:
+        drugs = drugs[:10]
 
     paginator = Paginator(drugs, 10)
-    page_number = request.GET.get('page', 1)
+    page_number = request.GET.get('page', 1) if search_q else 1
     page_obj = paginator.get_page(page_number)
 
     context = {
