@@ -67,10 +67,7 @@ def duplicate_check(request):
 def _split_ingredient_entries(raw_ingred):
     if not raw_ingred:
         return []
-    if '_' in raw_ingred:
-        parts = raw_ingred.split('_')
-    else:
-        parts = raw_ingred.split(',')
+    parts = raw_ingred.split('_')
     return [part.strip() for part in parts if part.strip()]
 
 
