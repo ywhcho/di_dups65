@@ -10,6 +10,7 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
     path('medicines/', include('medicines.urls')),
     path('med-dup/', include('med_dup.urls')),
+    path('med-interaction/', include('med_interaction.urls')),
     path('accounts/', include('accounts.urls')),
     path('board/', include('board.urls')),
     path('about/', TemplateView.as_view(template_name='about.html'), name='about'),

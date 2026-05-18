@@ -2,10 +2,11 @@ from django.db import models
 
 
 class Medicine(models.Model):
-    """의약품 중복성분 확인용 모델 (htname, ingred, company)"""
+    """의약품 모델 (약품명, 성분명, 회사명, 주성분코드)"""
     htname = models.CharField(max_length=200, verbose_name='약품명')
     ingred = models.CharField(max_length=500, verbose_name='성분명')
     company = models.CharField(max_length=200, verbose_name='회사명')
+    wfco = models.CharField(max_length=10, blank=True, default='', db_index=True, verbose_name='주성분코드')
 
     class Meta:
         verbose_name = '의약품'

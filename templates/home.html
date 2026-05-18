@@ -8,7 +8,7 @@
   </div>
 </div>
 
-<div class="row row-cols-1 row-cols-md-3 g-4 mt-2">
+<div class="row row-cols-1 row-cols-md-4 g-4 mt-2">
   <div class="col">
     <div class="card h-100 shadow-sm">
       <div class="card-body text-center">
@@ -26,6 +26,16 @@
         <h5 class="card-title mt-3">의약정보 보기</h5>
         <p class="card-text text-muted">성분, 회사, 효능별로 의약품을 검색하세요.</p>
         <a href="{% url 'medicines:druginfo_list' %}" class="btn btn-outline-primary" target="_blank" rel="noopener noreferrer">바로가기</a>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body text-center">
+        <i class="bi bi-shield-exclamation text-warning fs-1"></i>
+        <h5 class="card-title mt-3">약품 상호작용 보기</h5>
+        <p class="card-text text-muted">약품을 선택하여 상호작용 위험도를 확인하세요.</p>
+        <a href="{% url 'med_interaction:interaction_check' %}" class="btn btn-outline-warning" target="_blank" rel="noopener noreferrer">바로가기</a>
       </div>
     </div>
   </div>
