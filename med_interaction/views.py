@@ -8,10 +8,23 @@ from medicines.models import Medicine
 
 from .models import Mfname, Mintef
 
+RISK_GROUP_ORDER = ['A', 'B', 'C', 'D', 'E']
+RISK_FILTER_OPTIONS = [
+    ('', '전체'),
+    ('A', 'A'),
+    ('AB', 'AB'),
+    ('BCDE', 'BCDE'),
+    ('B', 'B'),
+    ('C', 'C'),
+    ('D', 'D'),
+    ('E', 'E'),
+]
+
 
 def interaction_check(request):
     """의약품 상호작용 보기"""
     query = request.GET.get('q', '').strip()
+    selected_risk_filter = request.session.get('selected_interaction_risk_filter', '')
     search_results = Medicine.objects.none()
     search_page = None
     if query:
@@ -42,6 +55,11 @@ def interaction_check(request):
         elif action == 'clear':
             selected = []
             request.session['selected_interaction_medicines'] = selected
+        elif action == 'set_risk_filter':
+            selected_risk_filter = request.POST.get('risk_filter', '').strip().upper()
+            if selected_risk_filter not in {value for value, _ in RISK_FILTER_OPTIONS}:
+                selected_risk_filter = ''
+            request.session['selected_interaction_risk_filter'] = selected_risk_filter
 
     selected_paginator = Paginator(selected, 7)
     selected_page_number = request.GET.get('spage', 1)
@@ -50,7 +68,11 @@ def interaction_check(request):
     interaction_result = None
     if request.method == 'POST' and request.POST.get('action') == 'check':
         selected = request.session.get('selected_interaction_medicines', [])
-        interaction_result = check_interactions(selected)
+        selected_risk_filter = request.POST.get('risk_filter', '').strip().upper()
+        if selected_risk_filter not in {value for value, _ in RISK_FILTER_OPTIONS}:
+            selected_risk_filter = ''
+        request.session['selected_interaction_risk_filter'] = selected_risk_filter
+        interaction_result = check_interactions(selected, selected_risk_filter)
 
     context = {
         'query': query,
@@ -58,6 +80,8 @@ def interaction_check(request):
         'selected_page': selected_page,
         'selected': selected,
         'interaction_result': interaction_result,
+        'risk_filter_options': RISK_FILTER_OPTIONS,
+        'selected_risk_filter': selected_risk_filter,
     }
     return render(request, 'med_interaction/interaction_check.html', context)
 
@@ -72,7 +96,28 @@ def _extract_igrnos(mfname_row):
     return codes
 
 
-def check_interactions(selected_names):
+def _get_allowed_risks(risk_filter):
+    mapping = {
+        '': set(RISK_GROUP_ORDER),
+        'A': {'A'},
+        'AB': {'A', 'B'},
+        'BCDE': {'B', 'C', 'D', 'E'},
+        'B': {'B'},
+        'C': {'C'},
+        'D': {'D'},
+        'E': {'E'},
+    }
+    return mapping.get(risk_filter, set(RISK_GROUP_ORDER))
+
+
+def _normalize_risk(irisk):
+    normalized = (irisk or '').strip().upper()[:1]
+    if normalized in RISK_GROUP_ORDER:
+        return normalized
+    return ''
+
+
+def check_interactions(selected_names, risk_filter=''):
     """선택 약품 간 상호작용 검사"""
     if len(selected_names) < 2:
         return None
@@ -112,6 +157,7 @@ def check_interactions(selected_names):
 
     interaction_rows = []
     seen = set()
+    allowed_risks = _get_allowed_risks(risk_filter)
 
     for med_a, med_b in combinations(selected_names, 2):
         if med_a not in medicine_components or med_b not in medicine_components:
@@ -140,6 +186,12 @@ def check_interactions(selected_names):
                 continue
             seen.add(dedup_key)
 
+            risk_group = _normalize_risk(match.irisk)
+            if risk_group and risk_group not in allowed_risks:
+                continue
+            if not risk_group and risk_filter:
+                continue
+
             interaction_rows.append(
                 {
                     'medicine_a': med_a,
@@ -147,6 +199,7 @@ def check_interactions(selected_names):
                     'igrno_a': code_a,
                     'igrno_b': code_b,
                     'irisk': match.irisk or '-',
+                    'risk_group': risk_group or '기타',
                     'idesc': match.idesc or '-',
                     'ireco': match.ireco or '-',
                 }
@@ -162,9 +215,21 @@ def check_interactions(selected_names):
         )
     )
 
+    interaction_groups = []
+    for risk_code in RISK_GROUP_ORDER:
+        rows = [row for row in interaction_rows if row['risk_group'] == risk_code]
+        if rows:
+            interaction_groups.append({'risk': risk_code, 'rows': rows})
+
+    other_rows = [row for row in interaction_rows if row['risk_group'] == '기타']
+    if other_rows:
+        interaction_groups.append({'risk': '기타', 'rows': other_rows})
+
     return {
         'medicine_components': medicine_components,
         'interaction_rows': interaction_rows,
+        'interaction_groups': interaction_groups,
         'has_interactions': len(interaction_rows) > 0,
         'medicines_without_mapping': medicines_without_mapping,
+        'selected_risk_filter': risk_filter,
     }
