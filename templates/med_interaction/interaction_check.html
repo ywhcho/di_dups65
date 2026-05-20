@@ -74,20 +74,13 @@
       <div class="card-body">
         {% if selected %}
           <ul class="list-group mb-3">
-            {% for row in selected_page_rows %}
-              <li class="list-group-item d-flex justify-content-between align-items-center {% if row.detail_pk %}list-group-item-action{% endif %}"
-                  {% if row.detail_pk %}
-                    role="button"
-                    tabindex="0"
-                    style="cursor: pointer;"
-                    onclick="window.open('{% url 'medicines:druginfo_detail' row.detail_pk %}', '_blank')"
-                    onkeydown="if(event.key==='Enter' || event.key===' '){event.preventDefault(); window.open('{% url 'medicines:druginfo_detail' row.detail_pk %}', '_blank');}"
-                  {% endif %}>
-                <span><i class="bi bi-capsule text-primary"></i> {{ row.name }}</span>
-                <form method="post" onclick="event.stopPropagation();" action="?q={{ query|urlencode }}&qpage={% if search_page %}{{ search_page.number }}{% else %}1{% endif %}&spage={{ selected_page.number }}">
+            {% for med_name in selected_page %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-capsule text-primary"></i> {{ med_name }}</span>
+                <form method="post" action="?q={{ query|urlencode }}&qpage={% if search_page %}{{ search_page.number }}{% else %}1{% endif %}&spage={{ selected_page.number }}">
                   {% csrf_token %}
                   <input type="hidden" name="action" value="remove">
-                  <input type="hidden" name="medicine_name" value="{{ row.name }}">
+                  <input type="hidden" name="medicine_name" value="{{ med_name }}">
                   <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> 삭제</button>
                 </form>
               </li>
