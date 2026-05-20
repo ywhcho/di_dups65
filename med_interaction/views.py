@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render
 
-from medicines.models import Medicine
+from medicines.models import DrugInfo, Medicine
 
 from .models import Mfname, Mintef
 
@@ -64,6 +64,11 @@ def interaction_check(request):
     selected_paginator = Paginator(selected, 7)
     selected_page_number = request.GET.get('spage', 1)
     selected_page = selected_paginator.get_page(selected_page_number)
+    selected_detail_pks = _get_detail_pks_by_name(selected_page.object_list)
+    selected_page_rows = [
+        {'name': medicine_name, 'detail_pk': selected_detail_pks.get(medicine_name)}
+        for medicine_name in selected_page.object_list
+    ]
 
     interaction_result = None
     if request.method == 'POST' and request.POST.get('action') == 'check':
@@ -78,6 +83,7 @@ def interaction_check(request):
         'query': query,
         'search_page': search_page,
         'selected_page': selected_page,
+        'selected_page_rows': selected_page_rows,
         'selected': selected,
         'interaction_result': interaction_result,
         'risk_filter_options': RISK_FILTER_OPTIONS,
@@ -94,6 +100,18 @@ def _extract_igrnos(mfname_row):
         if value:
             codes.append(value)
     return codes
+
+
+def _get_detail_pks_by_name(medicine_names):
+    detail_rows = (
+        DrugInfo.objects.filter(htname__in=medicine_names)
+        .values('id', 'htname')
+        .order_by('htname', 'id')
+    )
+    detail_pks = {}
+    for row in detail_rows:
+        detail_pks.setdefault(row['htname'], row['id'])
+    return detail_pks
 
 
 def _get_allowed_risks(risk_filter):

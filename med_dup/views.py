@@ -1,6 +1,6 @@
 from django.core.paginator import Paginator
 from django.shortcuts import render
-from medicines.models import Medicine
+from medicines.models import DrugInfo, Medicine
 import re
 
 MASS_UNIT_FACTORS_TO_MCG = {
@@ -48,6 +48,11 @@ def duplicate_check(request):
     paginator = Paginator(selected, 7)
     page_number = request.GET.get('spage', 1)
     selected_page = paginator.get_page(page_number)
+    selected_detail_pks = _get_detail_pks_by_name(selected_page.object_list)
+    selected_page_rows = [
+        {'name': medicine_name, 'detail_pk': selected_detail_pks.get(medicine_name)}
+        for medicine_name in selected_page.object_list
+    ]
 
     comparison_result = None
     if request.method == 'POST' and request.POST.get('action') == 'compare':
@@ -58,10 +63,23 @@ def duplicate_check(request):
         'query': query,
         'search_page': search_page,
         'selected_page': selected_page,
+        'selected_page_rows': selected_page_rows,
         'selected': selected,
         'comparison_result': comparison_result,
     }
     return render(request, 'med_dup/duplicate_check.html', context)
+
+
+def _get_detail_pks_by_name(medicine_names):
+    detail_rows = (
+        DrugInfo.objects.filter(htname__in=medicine_names)
+        .values('id', 'htname')
+        .order_by('htname', 'id')
+    )
+    detail_pks = {}
+    for row in detail_rows:
+        detail_pks.setdefault(row['htname'], row['id'])
+    return detail_pks
 
 
 def _split_ingredient_entries(raw_ingred):
