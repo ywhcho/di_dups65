@@ -258,7 +258,7 @@ document.querySelectorAll('.clickable-row').forEach(function(row) {
 ─────────────────────────────────────────────────────────── */
 {% if auto_focus %}
 (function() {
-  var target = document.getElementById('{{ auto_focus }}');
+  var target = document.getElementById('{{ auto_focus|escapejs }}');
   if (target && !window.location.hash) {
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
