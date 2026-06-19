@@ -15,10 +15,7 @@ def _format_amount(value):
     try:
         return f"{int(Decimal(normalized)):,}"
     except (InvalidOperation, ValueError):
-        pass
-    if normalized.isdigit():
-        return f"{int(normalized):,}"
-    return text
+        return text
 
 
 def search_view(request):
@@ -61,7 +58,7 @@ def search_view(request):
     # 페이지 로드 후 자동 스크롤 대상 결정
     # Table 2가 생성된 경우 → table2 섹션으로 포커스
     auto_focus = ''
-    if wfco_full and table2_page is not None:
+    if wfco_full:
         auto_focus = 'table2-section'
 
     return render(request, 'equiv_ingr/search.html', {
