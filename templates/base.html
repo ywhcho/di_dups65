@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>동일성분 찾기 (equiv_ingr)</title>
+  <style>
+    body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 0; background: #f8f9fa; }
+    nav { background: #343a40; padding: 10px 20px; }
+    nav a { color: #fff; text-decoration: none; margin-right: 15px; font-size: 14px; }
+    nav a:hover { text-decoration: underline; }
+    .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+    h2 { color: #343a40; border-bottom: 2px solid #007bff; padding-bottom: 6px; }
+    h3 { color: #495057; }
+    table { width: 100%; border-collapse: collapse; background: #fff; margin-bottom: 20px; }
+    th { background: #007bff; color: #fff; padding: 8px 10px; text-align: left; font-size: 13px; }
+    td { padding: 7px 10px; border-bottom: 1px solid #dee2e6; font-size: 13px; }
+    tr:hover td { background: #e9f3ff; cursor: pointer; }
+    tr.selected td { background: #cce0ff; }
+    .pagination { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 20px; }
+    .pagination a, .pagination span {
+      padding: 5px 10px; border: 1px solid #dee2e6; border-radius: 4px;
+      text-decoration: none; font-size: 13px; color: #007bff;
+    }
+    .pagination span.current { background: #007bff; color: #fff; border-color: #007bff; }
+    .pagination a:hover { background: #e9f3ff; }
+    .search-box { background: #fff; padding: 20px; border-radius: 6px;
+                  box-shadow: 0 1px 4px rgba(0,0,0,.1); margin-bottom: 20px; }
+    .search-box select, .search-box input[type=text] {
+      padding: 7px 10px; border: 1px solid #ced4da; border-radius: 4px;
+      font-size: 14px; margin-right: 8px;
+    }
+    .search-box input[type=text] { width: 280px; }
+    .search-box button {
+      padding: 7px 18px; background: #007bff; color: #fff; border: none;
+      border-radius: 4px; font-size: 14px; cursor: pointer;
+    }
+    .search-box button:hover { background: #0056b3; }
+    .table-section { background: #fff; padding: 15px; border-radius: 6px;
+                     box-shadow: 0 1px 4px rgba(0,0,0,.1); margin-bottom: 24px; }
+    .badge { display: inline-block; padding: 2px 8px; background: #007bff;
+             color: #fff; border-radius: 10px; font-size: 12px; margin-left: 8px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="{% url 'equiv_ingr:search' %}">동일성분 찾기</a>
+    {% if user.is_authenticated %}
+      <form method="post" action="{% url 'logout' %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" style="background:none;border:none;color:#fff;cursor:pointer;font-size:14px;">
+          로그아웃
+        </button>
+      </form>
+    {% else %}
+      <a href="{% url 'login' %}">로그인</a>
+    {% endif %}
+  </nav>
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>
