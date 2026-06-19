@@ -28,7 +28,7 @@
     <span class="badge">{{ table1_page.paginator.count }}건</span>
   </h3>
   <p style="font-size:12px;color:#6c757d;">
-    행을 클릭하면 해당 wfco 앞 6자리로 동일성분 목록(②)을 검색합니다.
+    행을 클릭하면 해당 wfco로 의약품 목록(②)을 검색합니다.
   </p>
   {% if table1_page.object_list %}
   <table>
@@ -44,12 +44,11 @@
     <tbody>
       {% for row in table1_page %}
       {% with row_no=table1_page.start_index|add:forloop.counter0 %}
-      {% with w6=row.wfco|slice:":6" %}
-      <tr class="clickable-row {% if wfco6 == w6 %}selected{% endif %}"
+      <tr class="clickable-row {% if wfco_full == row.wfco %}selected{% endif %}"
           data-nav="table1"
           data-type="{{ query_type }}"
           data-val="{{ query_val }}"
-          data-wfco6="{{ w6 }}"
+          data-wfco="{{ row.wfco }}"
           data-page1="{{ table1_page.number }}">
         <td>{{ row_no }}</td>
         <td>{{ row.wfco }}</td>
@@ -57,7 +56,6 @@
         <td>{{ row.kingrnd_t }}</td>
         <td>{{ row.cfno }}</td>
       </tr>
-      {% endwith %}
       {% endwith %}
       {% endfor %}
     </tbody>
@@ -67,17 +65,17 @@
   {% if table1_page.has_other_pages %}
   <div class="pagination">
     {% if table1_page.has_previous %}
-      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ table1_page.previous_page_number }}&page2={{ request.GET.page2|default:1 }}&page3={{ request.GET.page3|default:1 }}">이전</a>
+      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ table1_page.previous_page_number }}&page2={{ request.GET.page2|default:1 }}">이전</a>
     {% endif %}
     {% for num in table1_page.paginator.page_range %}
       {% if table1_page.number == num %}
         <span class="current">{{ num }}</span>
       {% elif num >= table1_page.number|add:-3 and num <= table1_page.number|add:3 %}
-        <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ num }}&page2={{ request.GET.page2|default:1 }}&page3={{ request.GET.page3|default:1 }}">{{ num }}</a>
+        <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ num }}&page2={{ request.GET.page2|default:1 }}">{{ num }}</a>
       {% endif %}
     {% endfor %}
     {% if table1_page.has_next %}
-      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ table1_page.next_page_number }}&page2={{ request.GET.page2|default:1 }}&page3={{ request.GET.page3|default:1 }}">다음</a>
+      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ table1_page.next_page_number }}&page2={{ request.GET.page2|default:1 }}">다음</a>
     {% endif %}
   </div>
   {% endif %}
@@ -89,85 +87,15 @@
 {% endif %}
 
 {# ══════════════════════════════════════════════════════════════ #}
-{# Table 2: wfco 앞 6자리 동일성분 (med_interaction_mfname) #}
+{# Table 2: wfco 전체 일치 의약품 목록 (medicines_medicine) #}
 {# ══════════════════════════════════════════════════════════════ #}
 {% if table2_page is not None %}
 <div id="table2-section" class="table-section">
-  <h3>② wfco 앞 6자리 동일성분 목록
+  <h3>② 의약품 목록 (medicines_medicine)
     <span class="badge">{{ table2_page.paginator.count }}건</span>
-    &nbsp;<small style="font-size:13px;color:#6c757d;">wfco prefix: <strong>{{ wfco6 }}</strong></small>
-  </h3>
-  <p style="font-size:12px;color:#6c757d;">
-    행을 클릭하면 wfco 전체로 의약품 목록(③)을 검색합니다.
-  </p>
-  {% if table2_page.object_list %}
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>활성성분코드 (wfco)</th>
-        <th>영문성분명 (ingrnd_t)</th>
-        <th>한글성분명 (kingrnd_t)</th>
-        <th>효능분류번호 (cfno)</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in table2_page %}
-      {% with row_no=table2_page.start_index|add:forloop.counter0 %}
-      <tr class="clickable-row {% if wfco_full == row.wfco %}selected{% endif %}"
-          data-nav="table2"
-          data-type="{{ query_type }}"
-          data-val="{{ query_val }}"
-          data-wfco6="{{ wfco6 }}"
-          data-wfco="{{ row.wfco }}"
-          data-page1="{{ request.GET.page1|default:1 }}"
-          data-page2="{{ table2_page.number }}">
-        <td>{{ row_no }}</td>
-        <td>{{ row.wfco }}</td>
-        <td>{{ row.ingrnd_t }}</td>
-        <td>{{ row.kingrnd_t }}</td>
-        <td>{{ row.cfno }}</td>
-      </tr>
-      {% endwith %}
-      {% endfor %}
-    </tbody>
-  </table>
-
-  {# Table 2 페이지네이션 #}
-  {% if table2_page.has_other_pages %}
-  <div class="pagination">
-    {% if table2_page.has_previous %}
-      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ table2_page.previous_page_number }}&page3={{ request.GET.page3|default:1 }}">이전</a>
-    {% endif %}
-    {% for num in table2_page.paginator.page_range %}
-      {% if table2_page.number == num %}
-        <span class="current">{{ num }}</span>
-      {% elif num >= table2_page.number|add:-3 and num <= table2_page.number|add:3 %}
-        <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ num }}&page3={{ request.GET.page3|default:1 }}">{{ num }}</a>
-      {% endif %}
-    {% endfor %}
-    {% if table2_page.has_next %}
-      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ table2_page.next_page_number }}&page3={{ request.GET.page3|default:1 }}">다음</a>
-    {% endif %}
-  </div>
-  {% endif %}
-
-  {% else %}
-  <p style="color:#6c757d;">해당 성분이 없습니다.</p>
-  {% endif %}
-</div>
-{% endif %}
-
-{# ══════════════════════════════════════════════════════════════ #}
-{# Table 3: wfco 전체 일치 의약품 목록 (medicines_medicine) #}
-{# ══════════════════════════════════════════════════════════════ #}
-{% if table3_page is not None %}
-<div id="table3-section" class="table-section">
-  <h3>③ 의약품 목록 (medicines_medicine)
-    <span class="badge">{{ table3_page.paginator.count }}건</span>
     &nbsp;<small style="font-size:13px;color:#6c757d;">wfco: <strong>{{ wfco_full }}</strong></small>
   </h3>
-  {% if table3_page.object_list %}
+  {% if table2_page.object_list %}
   <table>
     <thead>
       <tr>
@@ -178,12 +106,12 @@
         <th>회사 (company)</th>
         <th>효능분류 (cfno)</th>
         <th>성분계열 (deriv2)</th>
-        <th>연생산실적 (ypri24)</th>
+        <th style="text-align:right;">연생산실적 (ypri24)</th>
       </tr>
     </thead>
     <tbody>
-      {% for row in table3_page %}
-      {% with row_no=table3_page.start_index|add:forloop.counter0 %}
+      {% for row in table2_page %}
+      {% with row_no=table2_page.start_index|add:forloop.counter0 %}
       <tr>
         <td>{{ row_no }}</td>
         <td>{{ row.wfco }}</td>
@@ -192,28 +120,28 @@
         <td>{{ row.company }}</td>
         <td>{{ row.cfno }}</td>
         <td>{{ row.deriv2 }}</td>
-        <td>{{ row.ypri24 }}</td>
+        <td style="text-align:right;">{{ row.ypri24_display }}</td>
       </tr>
       {% endwith %}
       {% endfor %}
     </tbody>
   </table>
 
-  {# Table 3 페이지네이션 #}
-  {% if table3_page.has_other_pages %}
+  {# Table 2 페이지네이션 #}
+  {% if table2_page.has_other_pages %}
   <div class="pagination">
-    {% if table3_page.has_previous %}
-      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ request.GET.page2|default:1 }}&page3={{ table3_page.previous_page_number }}">이전</a>
+    {% if table2_page.has_previous %}
+      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ table2_page.previous_page_number }}">이전</a>
     {% endif %}
-    {% for num in table3_page.paginator.page_range %}
-      {% if table3_page.number == num %}
+    {% for num in table2_page.paginator.page_range %}
+      {% if table2_page.number == num %}
         <span class="current">{{ num }}</span>
-      {% elif num >= table3_page.number|add:-3 and num <= table3_page.number|add:3 %}
-        <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ request.GET.page2|default:1 }}&page3={{ num }}">{{ num }}</a>
+      {% elif num >= table2_page.number|add:-3 and num <= table2_page.number|add:3 %}
+        <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ num }}">{{ num }}</a>
       {% endif %}
     {% endfor %}
-    {% if table3_page.has_next %}
-      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ request.GET.page2|default:1 }}&page3={{ table3_page.next_page_number }}">다음</a>
+    {% if table2_page.has_next %}
+      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ table2_page.next_page_number }}">다음</a>
     {% endif %}
   </div>
   {% endif %}
@@ -236,19 +164,11 @@ document.querySelectorAll('.clickable-row').forEach(function(row) {
     p.set('val',  this.dataset.val  || '');
 
     if (nav === 'table1') {
-      /* Table1 행 클릭: wfco 앞 6자리로 Table2 표시, page1 유지 */
-      p.set('wfco6',  this.dataset.wfco6 || '');
+      /* Table1 행 클릭: wfco 전체로 Table2 표시, page1 유지 */
+      p.set('wfco',   this.dataset.wfco || '');
       p.set('page1',  this.dataset.page1 || '1');
       /* Table2 포커스를 위해 hash 추가 */
       window.location.href = '?' + p.toString() + '#table2-section';
-    } else if (nav === 'table2') {
-      /* Table2 행 클릭: wfco 전체로 Table3 표시, page1/page2 유지 */
-      p.set('wfco6',  this.dataset.wfco6  || '');
-      p.set('wfco',   this.dataset.wfco   || '');
-      p.set('page1',  this.dataset.page1  || '1');
-      p.set('page2',  this.dataset.page2  || '1');
-      /* Table3 포커스를 위해 hash 추가 */
-      window.location.href = '?' + p.toString() + '#table3-section';
     }
   });
 });
