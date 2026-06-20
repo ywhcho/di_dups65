@@ -51,7 +51,8 @@
           data-type="{{ query_type }}"
           data-val="{{ query_val }}"
           data-wfco="{{ row.wfco }}"
-          data-page1="{{ table1_page.number }}">
+          data-page1="{{ table1_page.number }}"
+          data-sort2="{{ sort2 }}">
         <td>{{ row_no }}</td>
         <td>{{ row.wfco }}</td>
         <td>{{ row.ingrnd_t }}</td>
@@ -68,17 +69,17 @@
   {% if table1_page.has_other_pages %}
   <div class="pagination">
     {% if table1_page.has_previous %}
-      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ table1_page.previous_page_number }}&page2={{ request.GET.page2|default:1 }}">이전</a>
+      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&sort2={{ sort2|urlencode }}&page1={{ table1_page.previous_page_number }}&page2={{ request.GET.page2|default:1 }}">이전</a>
     {% endif %}
     {% for num in table1_page.paginator.page_range %}
       {% if table1_page.number == num %}
         <span class="current">{{ num }}</span>
       {% elif num >= table1_page.number|add:-3 and num <= table1_page.number|add:3 %}
-        <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ num }}&page2={{ request.GET.page2|default:1 }}">{{ num }}</a>
+        <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&sort2={{ sort2|urlencode }}&page1={{ num }}&page2={{ request.GET.page2|default:1 }}">{{ num }}</a>
       {% endif %}
     {% endfor %}
     {% if table1_page.has_next %}
-      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ table1_page.next_page_number }}&page2={{ request.GET.page2|default:1 }}">다음</a>
+      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&sort2={{ sort2|urlencode }}&page1={{ table1_page.next_page_number }}&page2={{ request.GET.page2|default:1 }}">다음</a>
     {% endif %}
   </div>
   {% endif %}
@@ -105,13 +106,13 @@
       <tr>
         <th>#</th>
         <th>활성성분코드 (wfco)</th>
-        <th>제품명 (htname)</th>
+        <th><a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&sort2=htname&page1={{ request.GET.page1|default:1 }}">제품명 (htname)</a></th>
         <th>성분 (ingred)</th>
-        <th>회사 (company)</th>
+        <th><a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&sort2=company&page1={{ request.GET.page1|default:1 }}">회사 (company)</a></th>
         <th>효능분류 (cfno)</th>
         <th>ATC분류 (ATC)</th>
         <th>성분계열 (deriv2)</th>
-        <th style="text-align:right;">연생산실적 (ypri24)</th>
+        <th style="text-align:right;"><a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&sort2=ypri24&page1={{ request.GET.page1|default:1 }}">연생산실적 (ypri24)</a></th>
       </tr>
     </thead>
     <tbody>
@@ -137,17 +138,17 @@
   {% if table2_page.has_other_pages %}
   <div class="pagination">
     {% if table2_page.has_previous %}
-      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ table2_page.previous_page_number }}">이전</a>
+      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&sort2={{ sort2|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ table2_page.previous_page_number }}">이전</a>
     {% endif %}
     {% for num in table2_page.paginator.page_range %}
       {% if table2_page.number == num %}
         <span class="current">{{ num }}</span>
       {% elif num >= table2_page.number|add:-3 and num <= table2_page.number|add:3 %}
-        <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ num }}">{{ num }}</a>
+        <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&sort2={{ sort2|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ num }}">{{ num }}</a>
       {% endif %}
     {% endfor %}
     {% if table2_page.has_next %}
-      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ table2_page.next_page_number }}">다음</a>
+      <a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&sort2={{ sort2|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ table2_page.next_page_number }}">다음</a>
     {% endif %}
   </div>
   {% endif %}
@@ -173,6 +174,7 @@ document.querySelectorAll('.clickable-row').forEach(function(row) {
       /* Table1 행 클릭: wfco 전체로 Table2 표시, page1 유지 */
       p.set('wfco',   this.dataset.wfco || '');
       p.set('page1',  this.dataset.page1 || '1');
+      p.set('sort2',  this.dataset.sort2 || 'ypri24');
       /* Table2 포커스를 위해 hash 추가 */
       window.location.href = '?' + p.toString() + '#table2-section';
     }

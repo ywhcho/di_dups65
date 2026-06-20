@@ -38,6 +38,20 @@ def _get_table1_queryset(query_type, query_val):
     return qs
 
 
+def _get_table2_queryset(wfco_full, sort2):
+    sort_map = {
+        'htname': ('htname', 'id'),
+        'company': ('company', 'id'),
+        'ypri24': ('-ypri24_num', 'id'),
+    }
+    order_by = sort_map.get(sort2, sort_map['ypri24'])
+    return (
+        MedicinesMedicine.objects.filter(wfco=wfco_full)
+        .annotate(ypri24_num=Cast(Replace('ypri24', Value(','), Value('')), IntegerField()))
+        .order_by(*order_by)
+    )
+
+
 def search_view(request):
     """
     동일성분 찾기 메인 화면.
@@ -47,6 +61,7 @@ def search_view(request):
     query_type = request.GET.get('type', 'ingrnd_t')
     query_val = request.GET.get('val', '').strip()
     wfco_full = request.GET.get('wfco', '').strip()
+    sort2 = request.GET.get('sort2', 'ypri24').strip()
 
     # ── Table 1: 검색 결과 ──────────────────────────────────────────────────
     table1_page = None
@@ -59,11 +74,7 @@ def search_view(request):
     table2_page = None
     table2_ypri24_total = None
     if wfco_full:
-        qs2 = (
-            MedicinesMedicine.objects.filter(wfco=wfco_full)
-            .annotate(ypri24_num=Cast(Replace('ypri24', Value(','), Value('')), IntegerField()))
-            .order_by('-ypri24_num', 'id')
-        )
+        qs2 = _get_table2_queryset(wfco_full, sort2)
         agg = qs2.aggregate(total=Coalesce(Sum('ypri24_num'), Value(0), output_field=IntegerField()))
         table2_ypri24_total = _format_amount(str(agg['total'])) if agg['total'] else ''
         p2 = Paginator(qs2, PAGE_SIZE)
@@ -84,5 +95,6 @@ def search_view(request):
         'table2_page': table2_page,
         'table2_ypri24_total': table2_ypri24_total,
         'wfco_full': wfco_full,
+        'sort2': sort2,
         'auto_focus': auto_focus,
     })

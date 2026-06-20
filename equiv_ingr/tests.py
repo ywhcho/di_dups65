@@ -37,3 +37,40 @@ class Table1QuerysetTests(SimpleTestCase):
 
         mock_manager.none.assert_called_once_with()
         self.assertIs(result, none_qs)
+
+
+class Table2QuerysetTests(SimpleTestCase):
+    @patch('equiv_ingr.views.MedicinesMedicine.objects')
+    def test_htname_sort_orders_by_product_name(self, mock_manager):
+        ordered_qs = object()
+        filtered_qs = mock_manager.filter.return_value
+        annotated_qs = filtered_qs.annotate.return_value
+        annotated_qs.order_by.return_value = ordered_qs
+
+        result = views._get_table2_queryset('20745A10AT', 'htname')
+
+        mock_manager.filter.assert_called_once_with(wfco='20745A10AT')
+        annotated_qs.order_by.assert_called_once_with('htname', 'id')
+        self.assertIs(result, ordered_qs)
+
+    @patch('equiv_ingr.views.MedicinesMedicine.objects')
+    def test_company_sort_orders_by_company(self, mock_manager):
+        ordered_qs = object()
+        annotated_qs = mock_manager.filter.return_value.annotate.return_value
+        annotated_qs.order_by.return_value = ordered_qs
+
+        result = views._get_table2_queryset('20745A10AT', 'company')
+
+        annotated_qs.order_by.assert_called_once_with('company', 'id')
+        self.assertIs(result, ordered_qs)
+
+    @patch('equiv_ingr.views.MedicinesMedicine.objects')
+    def test_invalid_sort_defaults_to_ypri24_desc(self, mock_manager):
+        ordered_qs = object()
+        annotated_qs = mock_manager.filter.return_value.annotate.return_value
+        annotated_qs.order_by.return_value = ordered_qs
+
+        result = views._get_table2_queryset('20745A10AT', 'unknown')
+
+        annotated_qs.order_by.assert_called_once_with('-ypri24_num', 'id')
+        self.assertIs(result, ordered_qs)
