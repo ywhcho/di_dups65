@@ -4,7 +4,7 @@ from django.db import models
 class MedInteractionMfname(models.Model):
     """
     DB: med_interaction_mfname
-    wfco: 활성성분코드, ingrnd_t: 영문성분명, kingrnd_t: 한글성분명, cfno: 효능분류번호
+    wfco: 활성성분코드, ingrnd_t: 영문성분명, kingrnd_t: 한글성분명, cfno: 효능분류번호, ATC: ATC분류
     """
     wfco = models.CharField('활성성분코드', max_length=20, blank=True, default='')
     fname = models.CharField('성분명', max_length=255, blank=True, default='')
@@ -15,6 +15,7 @@ class MedInteractionMfname(models.Model):
     ingrnd_t = models.CharField('영문성분명', max_length=255, blank=True, default='')
     kingrnd_t = models.CharField('한글성분명', max_length=255, blank=True, default='')
     cfno = models.CharField('효능분류번호', max_length=20, blank=True, default='')
+    ATC = models.CharField('ATC분류', max_length=50, blank=True, default='')
 
     class Meta:
         db_table = 'med_interaction_mfname'
@@ -28,7 +29,7 @@ class MedicinesMedicine(models.Model):
     """
     DB: medicines_medicine
     wfco: 활성성분코드, htname: 제품명, ingred: 성분, company: 회사
-    cfno: 효능분류, deriv2: 성분계열, ypri24: 연생산실적
+    cfno: 효능분류, deriv2: 성분계열, ypri24: 연생산실적, ATC: ATC분류
     """
     wfco = models.CharField('활성성분코드', max_length=20, blank=True, default='')
     htname = models.CharField('제품명', max_length=255, blank=True, default='')
@@ -37,6 +38,7 @@ class MedicinesMedicine(models.Model):
     cfno = models.CharField('효능분류', max_length=20, blank=True, default='')
     deriv2 = models.CharField('성분계열', max_length=100, blank=True, default='')
     ypri24 = models.CharField('연생산실적', max_length=50, blank=True, default='')
+    ATC = models.CharField('ATC분류', max_length=50, blank=True, default='')
 
     class Meta:
         db_table = 'medicines_medicine'

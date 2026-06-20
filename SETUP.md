@@ -41,6 +41,7 @@ DB_PORT=3306
 | ingrnd_t  | VARCHAR(255) | 영문성분명     |
 | kingrnd_t | VARCHAR(255) | 한글성분명     |
 | cfno      | VARCHAR(20)  | 효능분류번호   |
+| ATC       | VARCHAR(50)  | ATC분류        |
 
 검색 성능을 위한 인덱스:
 
@@ -49,6 +50,7 @@ CREATE INDEX idx_mfname_wfco    ON med_interaction_mfname (wfco);
 CREATE INDEX idx_mfname_ingrnd  ON med_interaction_mfname (ingrnd_t(50));
 CREATE INDEX idx_mfname_kingrnd ON med_interaction_mfname (kingrnd_t(50));
 CREATE INDEX idx_mfname_cfno    ON med_interaction_mfname (cfno);
+CREATE INDEX idx_mfname_atc     ON med_interaction_mfname (ATC);
 ```
 
 ### 3-2. medicines_medicine 테이블
@@ -61,11 +63,20 @@ CREATE INDEX idx_mfname_cfno    ON med_interaction_mfname (cfno);
 | ingred  | VARCHAR(255) | 성분         |
 | company | VARCHAR(255) | 회사         |
 | cfno    | VARCHAR(20)  | 효능분류     |
+| ATC     | VARCHAR(50)  | ATC분류      |
 | deriv2  | VARCHAR(100) | 성분계열     |
 | ypri24  | VARCHAR(50)  | 연생산실적   |
 
 ```sql
 CREATE INDEX idx_medicine_wfco ON medicines_medicine (wfco);
+CREATE INDEX idx_medicine_atc  ON medicines_medicine (ATC);
+```
+
+기존 DB에 ATC 컬럼을 추가할 때:
+
+```sql
+ALTER TABLE med_interaction_mfname ADD COLUMN ATC VARCHAR(50) NOT NULL DEFAULT '';
+ALTER TABLE medicines_medicine ADD COLUMN ATC VARCHAR(50) NOT NULL DEFAULT '';
 ```
 
 ## 4. Django 초기화
@@ -85,10 +96,10 @@ python manage.py runserver
 
 브라우저에서 `http://localhost:8000/` 접속 후:
 
-1. **검색 폼**: 검색 유형(영문성분명 / 한글성분명 / 효능분류번호 / 활성성분코드)을 선택하고 검색어 입력 → **검색** 클릭
-2. **① 검색 결과 (Table 1)**: 검색 결과를 #, wfco, ingrnd_t, kingrnd_t, cfno 컬럼으로 표시.
+1. **검색 폼**: 검색 유형(영문성분명 / 한글성분명 / 효능분류번호 / 활성성분코드 / ATC분류)을 선택하고 검색어 입력 → **검색** 클릭
+2. **① 검색 결과 (Table 1)**: 검색 결과를 #, wfco, ingrnd_t, kingrnd_t, cfno, ATC 컬럼으로 표시.
    행을 클릭하면 해당 **wfco 전체값**으로 Table 2를 생성하고 자동으로 스크롤합니다.
-3. **② 의약품 목록 (Table 2)**: `medicines_medicine`에서 wfco가 일치하는 의약품 목록.
+3. **② 의약품 목록 (Table 2)**: `medicines_medicine`에서 wfco가 일치하는 의약품 목록을 `ypri24` 금액 기준 내림차순으로 표시.
 
 모든 테이블은 10건 초과 시 페이지네이션이 활성화됩니다.  
 `ypri24`는 정수 금액 포맷(천 단위 콤마)으로 표시되며 오른쪽 정렬됩니다.

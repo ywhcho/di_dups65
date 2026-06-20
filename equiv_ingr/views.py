@@ -1,6 +1,8 @@
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from decimal import Decimal, InvalidOperation
+from django.db.models import IntegerField, Value
+from django.db.models.functions import Cast, Replace
 
 from .models import MedInteractionMfname, MedicinesMedicine
 
@@ -21,7 +23,7 @@ def _format_amount(value):
 def search_view(request):
     """
     동일성분 찾기 메인 화면.
-    - Table 1: med_interaction_mfname 검색 (ingrnd_t / kingrnd_t / cfno / wfco)
+    - Table 1: med_interaction_mfname 검색 (ingrnd_t / kingrnd_t / cfno / wfco / ATC)
     - Table 2: Table 1 행 선택 → wfco 전체로 medicines_medicine 목록
     """
     query_type = request.GET.get('type', 'ingrnd_t')
@@ -36,6 +38,7 @@ def search_view(request):
             'kingrnd_t': 'kingrnd_t__icontains',
             'cfno':      'cfno__icontains',
             'wfco':      'wfco__icontains',
+            'ATC':       'ATC__icontains',
         }
         lookup = filter_map.get(query_type)
         qs1 = (
@@ -49,7 +52,11 @@ def search_view(request):
     # ── Table 2: wfco 전체 일치 의약품 목록 ────────────────────────────────
     table2_page = None
     if wfco_full:
-        qs2 = MedicinesMedicine.objects.filter(wfco=wfco_full)
+        qs2 = (
+            MedicinesMedicine.objects.filter(wfco=wfco_full)
+            .annotate(ypri24_num=Cast(Replace('ypri24', Value(','), Value('')), IntegerField()))
+            .order_by('-ypri24_num', 'id')
+        )
         p2 = Paginator(qs2, PAGE_SIZE)
         table2_page = p2.get_page(request.GET.get('page2', 1))
         for row in table2_page.object_list:

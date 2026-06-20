@@ -13,6 +13,7 @@
       <option value="kingrnd_t" {% if query_type == 'kingrnd_t' %}selected{% endif %}>한글성분명 (kingrnd_t)</option>
       <option value="cfno"      {% if query_type == 'cfno'      %}selected{% endif %}>효능분류번호 (cfno)</option>
       <option value="wfco"      {% if query_type == 'wfco'      %}selected{% endif %}>활성성분코드 (wfco)</option>
+      <option value="ATC"       {% if query_type == 'ATC'       %}selected{% endif %}>ATC분류 (ATC)</option>
     </select>
     <input type="text" name="val" value="{{ query_val }}" placeholder="검색어를 입력하세요" />
     <button type="submit">검색</button>
@@ -39,6 +40,7 @@
         <th>영문성분명 (ingrnd_t)</th>
         <th>한글성분명 (kingrnd_t)</th>
         <th>효능분류번호 (cfno)</th>
+        <th>ATC분류 (ATC)</th>
       </tr>
     </thead>
     <tbody>
@@ -55,6 +57,7 @@
         <td>{{ row.ingrnd_t }}</td>
         <td>{{ row.kingrnd_t }}</td>
         <td>{{ row.cfno }}</td>
+        <td>{{ row.ATC }}</td>
       </tr>
       {% endwith %}
       {% endfor %}
@@ -105,6 +108,7 @@
         <th>성분 (ingred)</th>
         <th>회사 (company)</th>
         <th>효능분류 (cfno)</th>
+        <th>ATC분류 (ATC)</th>
         <th>성분계열 (deriv2)</th>
         <th style="text-align:right;">연생산실적 (ypri24)</th>
       </tr>
@@ -119,6 +123,7 @@
         <td>{{ row.ingred }}</td>
         <td>{{ row.company }}</td>
         <td>{{ row.cfno }}</td>
+        <td>{{ row.ATC }}</td>
         <td>{{ row.deriv2 }}</td>
         <td style="text-align:right;">{{ row.ypri24_display }}</td>
       </tr>
