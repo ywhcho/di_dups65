@@ -106,13 +106,13 @@
       <tr>
         <th>#</th>
         <th>활성성분코드 (wfco)</th>
-        <th><a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&sort2=htname&page1={{ request.GET.page1|default:1 }}">제품명 (htname)</a></th>
+        <th><a href="{{ table2_sort_links.htname }}">제품명 (htname)</a></th>
         <th>성분 (ingred)</th>
-        <th><a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&sort2=company&page1={{ request.GET.page1|default:1 }}">회사 (company)</a></th>
+        <th><a href="{{ table2_sort_links.company }}">회사 (company)</a></th>
         <th>효능분류 (cfno)</th>
         <th>ATC분류 (ATC)</th>
         <th>성분계열 (deriv2)</th>
-        <th style="text-align:right;"><a href="?type={{ query_type|urlencode }}&val={{ query_val|urlencode }}&wfco={{ wfco_full|urlencode }}&sort2=ypri24&page1={{ request.GET.page1|default:1 }}">연생산실적 (ypri24)</a></th>
+        <th style="text-align:right;"><a href="{{ table2_sort_links.ypri24 }}">연생산실적 (ypri24)</a></th>
       </tr>
     </thead>
     <tbody>

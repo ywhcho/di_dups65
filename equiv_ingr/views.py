@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from decimal import Decimal, InvalidOperation
@@ -38,6 +40,12 @@ def _get_table1_queryset(query_type, query_val):
     return qs
 
 
+def _get_table2_base_queryset(wfco_full):
+    return MedicinesMedicine.objects.filter(wfco=wfco_full).annotate(
+        ypri24_num=Cast(Replace('ypri24', Value(','), Value('')), IntegerField())
+    )
+
+
 def _get_table2_queryset(wfco_full, sort2):
     sort_map = {
         'htname': ('htname', 'id'),
@@ -45,11 +53,21 @@ def _get_table2_queryset(wfco_full, sort2):
         'ypri24': ('-ypri24_num', 'id'),
     }
     order_by = sort_map.get(sort2, sort_map['ypri24'])
-    return (
-        MedicinesMedicine.objects.filter(wfco=wfco_full)
-        .annotate(ypri24_num=Cast(Replace('ypri24', Value(','), Value('')), IntegerField()))
-        .order_by(*order_by)
-    )
+    return _get_table2_base_queryset(wfco_full).order_by(*order_by)
+
+
+def _get_table2_sort_links(query_type, query_val, wfco_full, page1):
+    base_params = {
+        'type': query_type,
+        'val': query_val,
+        'wfco': wfco_full,
+        'page1': page1,
+        'page2': 1,
+    }
+    return {
+        key: '?' + urlencode({**base_params, 'sort2': key})
+        for key in ('htname', 'company', 'ypri24')
+    }
 
 
 def search_view(request):
@@ -94,6 +112,7 @@ def search_view(request):
         'table1_page': table1_page,
         'table2_page': table2_page,
         'table2_ypri24_total': table2_ypri24_total,
+        'table2_sort_links': _get_table2_sort_links(query_type, query_val, wfco_full, request.GET.get('page1', 1)),
         'wfco_full': wfco_full,
         'sort2': sort2,
         'auto_focus': auto_focus,

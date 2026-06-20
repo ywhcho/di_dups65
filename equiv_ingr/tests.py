@@ -74,3 +74,21 @@ class Table2QuerysetTests(SimpleTestCase):
 
         annotated_qs.order_by.assert_called_once_with('-ypri24_num', 'id')
         self.assertIs(result, ordered_qs)
+
+
+class Table2SortLinkTests(SimpleTestCase):
+    def test_sort_links_preserve_search_state_and_reset_page2(self):
+        links = views._get_table2_sort_links('ATC', 'A10', '20745A10AT', 3)
+
+        self.assertEqual(
+            links['htname'],
+            '?type=ATC&val=A10&wfco=20745A10AT&page1=3&page2=1&sort2=htname',
+        )
+        self.assertEqual(
+            links['company'],
+            '?type=ATC&val=A10&wfco=20745A10AT&page1=3&page2=1&sort2=company',
+        )
+        self.assertEqual(
+            links['ypri24'],
+            '?type=ATC&val=A10&wfco=20745A10AT&page1=3&page2=1&sort2=ypri24',
+        )
