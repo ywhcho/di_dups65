@@ -1,8 +1,8 @@
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from decimal import Decimal, InvalidOperation
-from django.db.models import IntegerField, Value
-from django.db.models.functions import Cast, Replace
+from django.db.models import IntegerField, Sum, Value
+from django.db.models.functions import Cast, Coalesce, Replace
 
 from .models import MedInteractionMfname, MedicinesMedicine
 
@@ -57,12 +57,15 @@ def search_view(request):
 
     # ── Table 2: wfco 전체 일치 의약품 목록 ────────────────────────────────
     table2_page = None
+    table2_ypri24_total = None
     if wfco_full:
         qs2 = (
             MedicinesMedicine.objects.filter(wfco=wfco_full)
             .annotate(ypri24_num=Cast(Replace('ypri24', Value(','), Value('')), IntegerField()))
             .order_by('-ypri24_num', 'id')
         )
+        agg = qs2.aggregate(total=Coalesce(Sum('ypri24_num'), Value(0), output_field=IntegerField()))
+        table2_ypri24_total = _format_amount(str(agg['total'])) if agg['total'] else ''
         p2 = Paginator(qs2, PAGE_SIZE)
         table2_page = p2.get_page(request.GET.get('page2', 1))
         for row in table2_page.object_list:
@@ -79,6 +82,7 @@ def search_view(request):
         'query_val': query_val,
         'table1_page': table1_page,
         'table2_page': table2_page,
+        'table2_ypri24_total': table2_ypri24_total,
         'wfco_full': wfco_full,
         'auto_focus': auto_focus,
     })
