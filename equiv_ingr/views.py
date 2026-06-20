@@ -20,6 +20,24 @@ def _format_amount(value):
         return text
 
 
+def _get_table1_queryset(query_type, query_val):
+    filter_map = {
+        'ingrnd_t': 'ingrnd_t__icontains',
+        'kingrnd_t': 'kingrnd_t__icontains',
+        'cfno': 'cfno__icontains',
+        'wfco': 'wfco__icontains',
+        'ATC': 'ATC__istartswith',
+    }
+    lookup = filter_map.get(query_type)
+    if not lookup:
+        return MedInteractionMfname.objects.none()
+
+    qs = MedInteractionMfname.objects.filter(**{lookup: query_val})
+    if query_type == 'ATC':
+        qs = qs.order_by('ATC', 'wfco', 'id')
+    return qs
+
+
 def search_view(request):
     """
     동일성분 찾기 메인 화면.
@@ -33,19 +51,7 @@ def search_view(request):
     # ── Table 1: 검색 결과 ──────────────────────────────────────────────────
     table1_page = None
     if query_val:
-        filter_map = {
-            'ingrnd_t':  'ingrnd_t__icontains',
-            'kingrnd_t': 'kingrnd_t__icontains',
-            'cfno':      'cfno__icontains',
-            'wfco':      'wfco__icontains',
-            'ATC':       'ATC__icontains',
-        }
-        lookup = filter_map.get(query_type)
-        qs1 = (
-            MedInteractionMfname.objects.filter(**{lookup: query_val})
-            if lookup
-            else MedInteractionMfname.objects.none()
-        )
+        qs1 = _get_table1_queryset(query_type, query_val)
         p1 = Paginator(qs1, PAGE_SIZE)
         table1_page = p1.get_page(request.GET.get('page1', 1))
 
