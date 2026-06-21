@@ -3,12 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>동일성분 찾기 (equiv_ingr)</title>
+  <title>{% block title %}의약정보 시스템{% endblock %}</title>
   <style>
     body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 0; background: #f8f9fa; }
-    nav { background: #343a40; padding: 10px 20px; }
-    nav a { color: #fff; text-decoration: none; margin-right: 15px; font-size: 14px; }
-    nav a:hover { text-decoration: underline; }
+    nav {
+      background: #343a40; padding: 12px 20px; display: flex; align-items: center;
+      justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    }
+    .nav-brand { color: #fff; font-size: 16px; font-weight: 700; text-decoration: none; }
+    .nav-links, .nav-auth { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    nav a, nav .nav-item {
+      color: #fff; text-decoration: none; font-size: 14px; display: inline-flex;
+      align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px;
+    }
+    nav a:hover { background: rgba(255,255,255,.12); }
+    .nav-item-disabled { color: rgba(255,255,255,.65); background: rgba(255,255,255,.08); }
     .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
     h2 { color: #343a40; border-bottom: 2px solid #007bff; padding-bottom: 6px; }
     h3 { color: #495057; }
@@ -40,21 +49,39 @@
                      box-shadow: 0 1px 4px rgba(0,0,0,.1); margin-bottom: 24px; }
     .badge { display: inline-block; padding: 2px 8px; background: #007bff;
              color: #fff; border-radius: 10px; font-size: 12px; margin-left: 8px; }
+    .menu-icon {
+      width: 1.2rem; height: 1.2rem; display: inline-flex; align-items: center;
+      justify-content: center; font-style: normal; border-radius: 50%; background: rgba(255,255,255,.14);
+    }
+    .menu-icon::before { font-size: 13px; line-height: 1; }
+    .icon-home::before { content: '⌂'; }
+    .icon-dup::before { content: '⧉'; }
+    .icon-equ::before { content: '🧪'; }
+    .icon-med::before { content: '💊'; }
+    .icon-auth::before { content: '↪'; }
   </style>
 </head>
 <body>
   <nav>
-    <a href="{% url 'equiv_ingr:search' %}">동일성분 찾기</a>
+    <a href="{% url 'home' %}" class="nav-brand">의약정보 시스템</a>
+    <div class="nav-links">
+      <a href="{% url 'home' %}#system-menu"><i class="menu-icon icon-dup" aria-hidden="true"></i>중복성분보기</a>
+      <a href="{% url 'equiv_ingr:search' %}"><i class="menu-icon icon-equ" aria-hidden="true"></i>동일성분 찾기</a>
+      <a href="{% url 'home' %}#system-menu"><i class="menu-icon icon-med" aria-hidden="true"></i>의약정보보기</a>
+    </div>
+    <div class="nav-auth">
     {% if user.is_authenticated %}
       <form method="post" action="{% url 'logout' %}" style="display:inline;">
         {% csrf_token %}
-        <button type="submit" style="background:none;border:none;color:#fff;cursor:pointer;font-size:14px;">
+        <button type="submit" style="background:none;border:none;color:#fff;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;">
+          <i class="menu-icon icon-auth" aria-hidden="true"></i>
           로그아웃
         </button>
       </form>
     {% else %}
-      <a href="{% url 'login' %}">로그인</a>
+      <a href="{% url 'login' %}"><i class="menu-icon icon-auth" aria-hidden="true"></i>로그인</a>
     {% endif %}
+    </div>
   </nav>
   <div class="container">
     {% block content %}{% endblock %}

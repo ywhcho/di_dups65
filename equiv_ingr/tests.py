@@ -1,6 +1,7 @@
 from unittest.mock import patch, sentinel
 
 from django.test import SimpleTestCase
+from django.urls import reverse
 
 from equiv_ingr import views
 
@@ -94,3 +95,20 @@ class Table2SortLinkTests(SimpleTestCase):
             links['ypri24'],
             '?type=ATC&val=A10&wfco=20745A10AT&page1=3&page2=1&sort2=ypri24',
         )
+
+
+class NavigationIntegrationTests(SimpleTestCase):
+    def test_home_page_lists_equiv_ingr_between_other_system_menus(self):
+        response = self.client.get(reverse('home'))
+
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        self.assertLess(content.index('중복성분보기'), content.index('동일성분 찾기'))
+        self.assertLess(content.index('동일성분 찾기'), content.index('의약정보보기'))
+        self.assertContains(response, reverse('equiv_ingr:search'))
+
+    def test_equiv_ingr_search_is_available_under_app_path(self):
+        response = self.client.get(reverse('equiv_ingr:search'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '동일성분 찾기 (equiv_ingr)')
