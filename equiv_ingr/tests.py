@@ -7,7 +7,7 @@ from equiv_ingr import views
 
 class Table1QuerysetTests(SimpleTestCase):
     @patch('equiv_ingr.views.MedInteractionMfname.objects')
-    def test_atc_search_uses_prefix_lookup_and_atc_ordering(self, mock_manager):
+    def test_atc_search_uses_prefix_lookup_and_wfco_ordering(self, mock_manager):
         ordered_qs = object()
         mock_qs = mock_manager.filter.return_value
         mock_qs.order_by.return_value = ordered_qs
@@ -15,18 +15,20 @@ class Table1QuerysetTests(SimpleTestCase):
         result = views._get_table1_queryset('ATC', 'A10')
 
         mock_manager.filter.assert_called_once_with(ATC__istartswith='A10')
-        mock_qs.order_by.assert_called_once_with('ATC', 'wfco', 'id')
+        mock_qs.order_by.assert_called_once_with('wfco', 'id')
         self.assertIs(result, ordered_qs)
 
     @patch('equiv_ingr.views.MedInteractionMfname.objects')
-    def test_non_atc_search_keeps_contains_lookup_without_ordering(self, mock_manager):
+    def test_non_atc_search_uses_contains_lookup_with_wfco_ordering(self, mock_manager):
+        ordered_qs = object()
         mock_qs = mock_manager.filter.return_value
+        mock_qs.order_by.return_value = ordered_qs
 
         result = views._get_table1_queryset('wfco', '123')
 
         mock_manager.filter.assert_called_once_with(wfco__icontains='123')
-        mock_qs.order_by.assert_not_called()
-        self.assertIs(result, mock_qs)
+        mock_qs.order_by.assert_called_once_with('wfco', 'id')
+        self.assertIs(result, ordered_qs)
 
     @patch('equiv_ingr.views.MedInteractionMfname.objects')
     def test_unknown_search_type_returns_none_queryset(self, mock_manager):

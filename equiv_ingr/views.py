@@ -34,10 +34,7 @@ def _get_table1_queryset(query_type, query_val):
     if not lookup:
         return MedInteractionMfname.objects.none()
 
-    qs = MedInteractionMfname.objects.filter(**{lookup: query_val})
-    if query_type == 'ATC':
-        qs = qs.order_by('ATC', 'wfco', 'id')
-    return qs
+    return MedInteractionMfname.objects.filter(**{lookup: query_val}).order_by('wfco', 'id')
 
 
 def _get_table2_base_queryset(wfco_full):
