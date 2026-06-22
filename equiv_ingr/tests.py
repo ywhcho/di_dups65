@@ -103,8 +103,8 @@ class NavigationIntegrationTests(SimpleTestCase):
 
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
-        self.assertLess(content.index('중복성분보기'), content.index('동일성분 찾기'))
-        self.assertLess(content.index('동일성분 찾기'), content.index('의약정보보기'))
+        self.assertLess(content.index('중복성분보기'), content.index('동일성분찾기'))
+        self.assertLess(content.index('동일성분찾기'), content.index('의약정보보기'))
         self.assertContains(response, reverse('equiv_ingr:search'))
 
     def test_equiv_ingr_search_is_available_under_app_path(self):
@@ -112,3 +112,25 @@ class NavigationIntegrationTests(SimpleTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '동일성분 찾기 (equiv_ingr)')
+
+    def test_board_page_is_accessible(self):
+        response = self.client.get(reverse('board'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '게시판')
+
+    def test_about_page_is_accessible(self):
+        response = self.client.get(reverse('about'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'About Us')
+
+    def test_all_nav_items_present_on_home(self):
+        response = self.client.get(reverse('home'))
+
+        self.assertContains(response, '중복성분보기')
+        self.assertContains(response, '동일성분찾기')
+        self.assertContains(response, '의약정보보기')
+        self.assertContains(response, '게시판')
+        self.assertContains(response, 'About Us')
+        self.assertContains(response, '로그인')
