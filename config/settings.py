@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'equiv_ingr.apps.EquivIngrConfig',
+    'equiv_htname.apps.EquivHtnameConfig',
 ]
 
 MIDDLEWARE = [

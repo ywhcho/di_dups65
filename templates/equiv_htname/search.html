@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+{% block title %}상품명으로 동일성분 찾기{% endblock %}
+{% block content %}
+
+<h2>상품명으로 동일성분 찾기 (equiv_htname)</h2>
+
+{# ══════════════════════════════════════════════════════════════ #}
+{# 검색 폼 #}
+{# ══════════════════════════════════════════════════════════════ #}
+<div class="search-box">
+  <form method="get" action="">
+    <input type="text" name="htname" value="{{ htname_q }}" placeholder="상품명(htname)을 입력하세요" />
+    <button type="submit">검색</button>
+  </form>
+</div>
+
+{# ══════════════════════════════════════════════════════════════ #}
+{# Table 1: 상품명 검색 결과 (medicines_medicine) #}
+{# ══════════════════════════════════════════════════════════════ #}
+{% if table1_page is not None %}
+<div id="table1-section" class="table-section">
+  <h3>① 상품명 검색 결과
+    <span class="badge">{{ table1_page.paginator.count }}건</span>
+  </h3>
+  <p style="font-size:12px;color:#6c757d;">
+    행을 클릭하면 wfco 앞 6자리로 동일성분(②)을 검색합니다.
+  </p>
+  {% if table1_page.object_list %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>활성성분코드 (wfco)</th>
+        <th>상품명 (htname)</th>
+        <th>성분명 (ingr_t)</th>
+        <th>회사 (company)</th>
+        <th>효능분류번호 (cfno)</th>
+        <th>ATC분류 (atc)</th>
+        <th>계열분류 (deriv2)</th>
+        <th>년생산액 (ypri24)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in table1_page %}
+      {% with row_no=table1_page.start_index|add:forloop.counter0 %}
+      <tr class="clickable-row {% if wfco6 == row.wfco|slice:':6' %}selected{% endif %}"
+          data-nav="table1"
+          data-htname="{{ htname_q }}"
+          data-wfco6="{{ row.wfco|slice:':6' }}"
+          data-page1="{{ table1_page.number }}">
+        <td>{{ row_no }}</td>
+        <td>{{ row.wfco }}</td>
+        <td>{{ row.htname }}</td>
+        <td>{{ row.ingr_t }}</td>
+        <td>{{ row.company }}</td>
+        <td>{{ row.cfno }}</td>
+        <td>{{ row.atc }}</td>
+        <td>{{ row.deriv2 }}</td>
+        <td style="text-align:right;">{{ row.ypri24 }}</td>
+      </tr>
+      {% endwith %}
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {# Table 1 페이지네이션 #}
+  {% if table1_page.has_other_pages %}
+  <div class="pagination">
+    {% if table1_page.has_previous %}
+      <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ table1_page.previous_page_number }}&page2={{ request.GET.page2|default:1 }}&page3={{ request.GET.page3|default:1 }}">이전</a>
+    {% endif %}
+    {% for num in table1_page.paginator.page_range %}
+      {% if table1_page.number == num %}
+        <span class="current">{{ num }}</span>
+      {% elif num >= table1_page.number|add:-3 and num <= table1_page.number|add:3 %}
+        <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ num }}&page2={{ request.GET.page2|default:1 }}&page3={{ request.GET.page3|default:1 }}">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+    {% if table1_page.has_next %}
+      <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ table1_page.next_page_number }}&page2={{ request.GET.page2|default:1 }}&page3={{ request.GET.page3|default:1 }}">다음</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% else %}
+  <p style="color:#6c757d;">검색 결과가 없습니다.</p>
+  {% endif %}
+</div>
+{% endif %}
+
+{# ══════════════════════════════════════════════════════════════ #}
+{# Table 2: wfco 앞 6자리 비교 결과 (med_interaction_mfname) #}
+{# ══════════════════════════════════════════════════════════════ #}
+{% if table2_page is not None %}
+<div id="table2-section" class="table-section">
+  <h3>② 동일성분 목록 (med_interaction_mfname)
+    <span class="badge">{{ table2_page.paginator.count }}건</span>
+    &nbsp;<small style="font-size:13px;color:#6c757d;">wfco 앞 6자리: <strong>{{ wfco6 }}</strong></small>
+  </h3>
+  <p style="font-size:12px;color:#6c757d;">
+    행을 클릭하면 wfco 전체(10자리)로 의약품 목록(③)을 검색합니다.
+  </p>
+  {% if table2_page.object_list %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>활성성분코드 (wfco)</th>
+        <th>성분명 (ingr_t)</th>
+        <th>효능분류 (cfno)</th>
+        <th>ATC분류 (atc)</th>
+        <th>계열분류 (deriv2)</th>
+        <th>년생산액 (ypri24)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in table2_page %}
+      {% with row_no=table2_page.start_index|add:forloop.counter0 %}
+      <tr class="clickable-row {% if wfco_full == row.wfco %}selected{% endif %}"
+          data-nav="table2"
+          data-htname="{{ htname_q }}"
+          data-wfco6="{{ wfco6 }}"
+          data-wfco="{{ row.wfco }}"
+          data-page1="{{ request.GET.page1|default:1 }}"
+          data-page2="{{ table2_page.number }}">
+        <td>{{ row_no }}</td>
+        <td>{{ row.wfco }}</td>
+        <td>{{ row.ingr_t }}</td>
+        <td>{{ row.cfno }}</td>
+        <td>{{ row.atc }}</td>
+        <td>{{ row.deriv2 }}</td>
+        <td style="text-align:right;">{{ row.ypri24 }}</td>
+      </tr>
+      {% endwith %}
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {# Table 2 페이지네이션 #}
+  {% if table2_page.has_other_pages %}
+  <div class="pagination">
+    {% if table2_page.has_previous %}
+      <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ table2_page.previous_page_number }}&page3={{ request.GET.page3|default:1 }}">이전</a>
+    {% endif %}
+    {% for num in table2_page.paginator.page_range %}
+      {% if table2_page.number == num %}
+        <span class="current">{{ num }}</span>
+      {% elif num >= table2_page.number|add:-3 and num <= table2_page.number|add:3 %}
+        <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ num }}&page3={{ request.GET.page3|default:1 }}">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+    {% if table2_page.has_next %}
+      <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ table2_page.next_page_number }}&page3={{ request.GET.page3|default:1 }}">다음</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% else %}
+  <p style="color:#6c757d;">해당 성분이 없습니다.</p>
+  {% endif %}
+</div>
+{% endif %}
+
+{# ══════════════════════════════════════════════════════════════ #}
+{# Table 3: wfco 전체 비교 결과 (medicines_medicine) #}
+{# ══════════════════════════════════════════════════════════════ #}
+{% if table3_page is not None %}
+<div id="table3-section" class="table-section">
+  <h3>③ 의약품 목록 (medicines_medicine)
+    <span class="badge">{{ table3_page.paginator.count }}건</span>
+    &nbsp;<small style="font-size:13px;color:#6c757d;">wfco: <strong>{{ wfco_full }}</strong></small>
+  </h3>
+  {% if table3_page.object_list %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>활성성분코드 (wfco)</th>
+        <th>상품명 (htname)</th>
+        <th>성분명 (ingr_t)</th>
+        <th>회사 (company)</th>
+        <th>효능분류번호 (cfno)</th>
+        <th>ATC분류 (atc)</th>
+        <th>계열분류 (deriv2)</th>
+        <th>년생산액 (ypri24)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in table3_page %}
+      {% with row_no=table3_page.start_index|add:forloop.counter0 %}
+      <tr>
+        <td>{{ row_no }}</td>
+        <td>{{ row.wfco }}</td>
+        <td>{{ row.htname }}</td>
+        <td>{{ row.ingr_t }}</td>
+        <td>{{ row.company }}</td>
+        <td>{{ row.cfno }}</td>
+        <td>{{ row.atc }}</td>
+        <td>{{ row.deriv2 }}</td>
+        <td style="text-align:right;">{{ row.ypri24 }}</td>
+      </tr>
+      {% endwith %}
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {# Table 3 페이지네이션 #}
+  {% if table3_page.has_other_pages %}
+  <div class="pagination">
+    {% if table3_page.has_previous %}
+      <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ request.GET.page2|default:1 }}&page3={{ table3_page.previous_page_number }}">이전</a>
+    {% endif %}
+    {% for num in table3_page.paginator.page_range %}
+      {% if table3_page.number == num %}
+        <span class="current">{{ num }}</span>
+      {% elif num >= table3_page.number|add:-3 and num <= table3_page.number|add:3 %}
+        <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ request.GET.page2|default:1 }}&page3={{ num }}">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+    {% if table3_page.has_next %}
+      <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ request.GET.page2|default:1 }}&page3={{ table3_page.next_page_number }}">다음</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% else %}
+  <p style="color:#6c757d;">해당 의약품이 없습니다.</p>
+  {% endif %}
+</div>
+{% endif %}
+
+<script>
+/* ───────────────────────────────────────────────────────────
+   행 클릭 네비게이션
+─────────────────────────────────────────────────────────── */
+document.querySelectorAll('.clickable-row').forEach(function(row) {
+  row.addEventListener('click', function() {
+    var nav = this.dataset.nav;
+    var p = new URLSearchParams();
+    p.set('htname', this.dataset.htname || '');
+
+    if (nav === 'table1') {
+      /* Table1 행 클릭: wfco 앞 6자리로 Table2 생성 */
+      p.set('wfco6', this.dataset.wfco6 || '');
+      p.set('page1', this.dataset.page1 || '1');
+      p.set('page2', '1');
+      window.location.href = '?' + p.toString() + '#table2-section';
+    } else if (nav === 'table2') {
+      /* Table2 행 클릭: wfco 전체로 Table3 생성 */
+      p.set('wfco6', this.dataset.wfco6 || '');
+      p.set('wfco', this.dataset.wfco || '');
+      p.set('page1', this.dataset.page1 || '1');
+      p.set('page2', this.dataset.page2 || '1');
+      p.set('page3', '1');
+      window.location.href = '?' + p.toString() + '#table3-section';
+    }
+  });
+});
+
+/* ───────────────────────────────────────────────────────────
+   페이지 로드 후 자동 스크롤
+─────────────────────────────────────────────────────────── */
+{% if auto_focus %}
+(function() {
+  var target = document.getElementById('{{ auto_focus|escapejs }}');
+  if (target && !window.location.hash) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+})();
+{% endif %}
+</script>
+{% endblock %}
