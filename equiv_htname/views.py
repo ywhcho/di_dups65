@@ -53,7 +53,8 @@ def search_view(request):
     wfco_t1 = request.GET.get('wfco_t1', '').strip() # Table1 선택 행의 wfco 전체(Table2 하이라이트용)
     wfco_full = request.GET.get('wfco', '').strip()   # Table2 행 선택 시 wfco 전체
     nofocus = request.GET.get('nofocus', '')          # 페이지네이션 이동 시 스크롤 억제
-    sort3 = request.GET.get('sort3', '')              # Table 3 정렬 기준
+    sort3_raw = request.GET.get('sort3', '')          # Table 3 정렬 기준
+    sort3 = sort3_raw if sort3_raw in ('htname', 'company', 'ypri24') else 'ypri24'
 
     # ── Table 1: 상품명 검색 ────────────────────────────────────────────────
     table1_page = None
@@ -88,7 +89,7 @@ def search_view(request):
             'company': ('company', 'id'),
             'ypri24': ('-ypri24_num', 'id'),
         }
-        t3_order = _sort3_map.get(sort3, ('-ypri24_num', 'id'))
+        t3_order = _sort3_map[sort3]
         qs3 = _annotate_ypri24(
             MedicinesMedicine.objects.filter(wfco=wfco_full)
         ).order_by(*t3_order)
