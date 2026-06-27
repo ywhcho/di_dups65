@@ -21,7 +21,7 @@
 <div id="table1-section" class="table-section">
   <h3>① 상품명 검색 결과
     <span class="badge">{{ table1_page.paginator.count }}건</span>
-    {% if table1_ypri24_total %}&nbsp;<small style="font-size:13px;color:#6c757d;">년생산액 합계: <strong>{{ table1_ypri24_total }}</strong></small>{% endif %}
+    {% if table1_ypri24_total %}&nbsp;<small style="font-size:13px;color:#6c757d;">연생산액 합계: <strong>{{ table1_ypri24_total }}</strong></small>{% endif %}
   </h3>
   <p style="font-size:12px;color:#6c757d;">
     행을 클릭하면 wfco 앞 6자리로 동일성분(②)을 검색합니다.
@@ -98,7 +98,7 @@
   <h3>② 동일성분 목록 (med_interaction_mfname)
     <span class="badge">{{ table2_page.paginator.count }}건</span>
     &nbsp;<small style="font-size:13px;color:#6c757d;">wfco 앞 6자리: <strong>{{ wfco6 }}</strong></small>
-    {% if table2_ypri24_total %}&nbsp;<small style="font-size:13px;color:#6c757d;">년생산액 합계: <strong>{{ table2_ypri24_total }}</strong></small>{% endif %}
+    {% if table2_ypri24_total %}&nbsp;<small style="font-size:13px;color:#6c757d;">연생산액 합계: <strong>{{ table2_ypri24_total }}</strong></small>{% endif %}
   </h3>
   <p style="font-size:12px;color:#6c757d;">
     행을 클릭하면 wfco 전체(10자리)로 의약품 목록(③)을 검색합니다.
@@ -183,7 +183,7 @@
   <h3>③ 의약품 목록 (medicines_medicine)
     <span class="badge">{{ table3_page.paginator.count }}건</span>
     &nbsp;<small style="font-size:13px;color:#6c757d;">wfco: <strong>{{ wfco_full }}</strong></small>
-    {% if table3_ypri24_total %}&nbsp;<small style="font-size:13px;color:#6c757d;">년생산액 합계: <strong>{{ table3_ypri24_total }}</strong></small>{% endif %}
+    {% if table3_ypri24_total %}&nbsp;<small style="font-size:13px;color:#6c757d;">연생산액 합계: <strong>{{ table3_ypri24_total }}</strong></small>{% endif %}
   </h3>
   {% if table3_page.object_list %}
   <table>
