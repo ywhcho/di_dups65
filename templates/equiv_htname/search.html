@@ -154,17 +154,17 @@
   {% if table2_page.has_other_pages %}
   <div class="pagination">
     {% if table2_page.has_previous %}
-      <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco_t1={{ wfco_t1|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ table2_page.previous_page_number }}&page3={{ request.GET.page3|default:1 }}">이전</a>
+      <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco_t1={{ wfco_t1|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ table2_page.previous_page_number }}&page3={{ request.GET.page3|default:1 }}&nofocus=1">이전</a>
     {% endif %}
     {% for num in table2_page.paginator.page_range %}
       {% if table2_page.number == num %}
         <span class="current">{{ num }}</span>
       {% elif num >= table2_page.number|add:-3 and num <= table2_page.number|add:3 %}
-        <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco_t1={{ wfco_t1|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ num }}&page3={{ request.GET.page3|default:1 }}">{{ num }}</a>
+        <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco_t1={{ wfco_t1|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ num }}&page3={{ request.GET.page3|default:1 }}&nofocus=1">{{ num }}</a>
       {% endif %}
     {% endfor %}
     {% if table2_page.has_next %}
-      <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco_t1={{ wfco_t1|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ table2_page.next_page_number }}&page3={{ request.GET.page3|default:1 }}">다음</a>
+      <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco_t1={{ wfco_t1|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ table2_page.next_page_number }}&page3={{ request.GET.page3|default:1 }}&nofocus=1">다음</a>
     {% endif %}
   </div>
   {% endif %}
@@ -191,13 +191,13 @@
       <tr>
         <th>#</th>
         <th>활성성분코드 (wfco)</th>
-        <th>상품명 (htname)</th>
+        <th><a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco_t1={{ wfco_t1|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ request.GET.page2|default:1 }}&page3=1&sort3=htname" class="sort-link">제품명 (htname){% if sort3 == 'htname' %} ▲{% endif %}</a></th>
         <th>성분명 (ingr_t)</th>
-        <th>회사 (company)</th>
+        <th><a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco_t1={{ wfco_t1|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ request.GET.page2|default:1 }}&page3=1&sort3=company" class="sort-link">회사 (company){% if sort3 == 'company' %} ▲{% endif %}</a></th>
         <th>효능분류번호 (cfno)</th>
         <th>ATC분류 (atc)</th>
         <th>계열분류 (deriv2)</th>
-        <th style="text-align:right;">년생산액 (ypri24) ▼</th>
+        <th style="text-align:right;"><a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco_t1={{ wfco_t1|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ request.GET.page2|default:1 }}&page3=1&sort3=ypri24" class="sort-link">년생산액 (ypri24){% if sort3 == 'ypri24' or sort3 == '' %} ▼{% endif %}</a></th>
       </tr>
     </thead>
     <tbody>
@@ -223,17 +223,17 @@
   {% if table3_page.has_other_pages %}
   <div class="pagination">
     {% if table3_page.has_previous %}
-      <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco_t1={{ wfco_t1|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ request.GET.page2|default:1 }}&page3={{ table3_page.previous_page_number }}">이전</a>
+      <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco_t1={{ wfco_t1|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ request.GET.page2|default:1 }}&page3={{ table3_page.previous_page_number }}&sort3={{ sort3 }}&nofocus=1">이전</a>
     {% endif %}
     {% for num in table3_page.paginator.page_range %}
       {% if table3_page.number == num %}
         <span class="current">{{ num }}</span>
       {% elif num >= table3_page.number|add:-3 and num <= table3_page.number|add:3 %}
-        <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco_t1={{ wfco_t1|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ request.GET.page2|default:1 }}&page3={{ num }}">{{ num }}</a>
+        <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco_t1={{ wfco_t1|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ request.GET.page2|default:1 }}&page3={{ num }}&sort3={{ sort3 }}&nofocus=1">{{ num }}</a>
       {% endif %}
     {% endfor %}
     {% if table3_page.has_next %}
-      <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco_t1={{ wfco_t1|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ request.GET.page2|default:1 }}&page3={{ table3_page.next_page_number }}">다음</a>
+      <a href="?htname={{ htname_q|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco_t1={{ wfco_t1|urlencode }}&wfco={{ wfco_full|urlencode }}&page1={{ request.GET.page1|default:1 }}&page2={{ request.GET.page2|default:1 }}&page3={{ table3_page.next_page_number }}&sort3={{ sort3 }}&nofocus=1">다음</a>
     {% endif %}
   </div>
   {% endif %}
@@ -252,6 +252,15 @@ tr.t2-exact-match td {
 }
 tr.t2-exact-match:hover td {
   background: #9fc2ee !important;
+}
+/* Table 3 소제목 정렬 링크 */
+a.sort-link {
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+a.sort-link:hover {
+  text-decoration: underline;
 }
 </style>
 
@@ -289,6 +298,9 @@ document.querySelectorAll('.clickable-row').forEach(function(row) {
    페이지 로드 후 자동 스크롤
 ─────────────────────────────────────────────────────────── */
 (function() {
+  var noFocus = new URLSearchParams(window.location.search).get('nofocus');
+  if (noFocus) { return; }
+
   var hash = window.location.hash;
   if (hash) {
     var el = document.querySelector(hash);
@@ -303,6 +315,8 @@ document.querySelectorAll('.clickable-row').forEach(function(row) {
 
 /* Table2: wfco 10자리 일치 행이 현재 페이지에 있으면 해당 행으로 스크롤 */
 (function() {
+  var noFocus = new URLSearchParams(window.location.search).get('nofocus');
+  if (noFocus) { return; }
   var focusRow = document.getElementById('table2-focus-row');
   if (focusRow) {
     setTimeout(function() {

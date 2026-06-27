@@ -52,6 +52,8 @@ def search_view(request):
     wfco6 = request.GET.get('wfco6', '').strip()     # Table1 행 선택 시 wfco 앞 6자리
     wfco_t1 = request.GET.get('wfco_t1', '').strip() # Table1 선택 행의 wfco 전체(Table2 하이라이트용)
     wfco_full = request.GET.get('wfco', '').strip()   # Table2 행 선택 시 wfco 전체
+    nofocus = request.GET.get('nofocus', '')          # 페이지네이션 이동 시 스크롤 억제
+    sort3 = request.GET.get('sort3', '')              # Table 3 정렬 기준
 
     # ── Table 1: 상품명 검색 ────────────────────────────────────────────────
     table1_page = None
@@ -81,26 +83,34 @@ def search_view(request):
     table3_page = None
     table3_ypri24_total = ''
     if wfco_full:
+        _sort3_map = {
+            'htname': ('htname', 'id'),
+            'company': ('company', 'id'),
+            'ypri24': ('-ypri24_num', 'id'),
+        }
+        t3_order = _sort3_map.get(sort3, ('-ypri24_num', 'id'))
         qs3 = _annotate_ypri24(
             MedicinesMedicine.objects.filter(wfco=wfco_full)
-        ).order_by('-ypri24_num', 'id')
+        ).order_by(*t3_order)
         table3_ypri24_total = _ypri24_total(qs3)
         p3 = Paginator(qs3, PAGE_SIZE)
         table3_page = p3.get_page(request.GET.get('page3', 1))
         _set_ypri24_display(table3_page)
 
-    # 페이지 로드 후 자동 스크롤 대상
+    # 페이지 로드 후 자동 스크롤 대상 (페이지네이션 이동 시 억제)
     auto_focus = ''
-    if wfco_full:
-        auto_focus = 'table3-section'
-    elif wfco6:
-        auto_focus = 'table2-section'
+    if not nofocus:
+        if wfco_full:
+            auto_focus = 'table3-section'
+        elif wfco6:
+            auto_focus = 'table2-section'
 
     return render(request, 'equiv_htname/search.html', {
         'htname_q': htname_q,
         'wfco6': wfco6,
         'wfco_t1': wfco_t1,
         'wfco_full': wfco_full,
+        'sort3': sort3,
         'table1_page': table1_page,
         'table1_ypri24_total': table1_ypri24_total,
         'table2_page': table2_page,
