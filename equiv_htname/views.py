@@ -40,27 +40,49 @@ def _set_ypri24_display(page):
         row.ypri24_display = _format_amount(row.ypri24)
 
 
+SEARCH_TYPES = {
+    'htname':  ('htname__icontains',   '상품명'),
+    'ingr_t':  ('ingr_t__icontains',   '성분명'),
+    'company': ('company__icontains',  '회사'),
+    'cfno':    ('cfno__icontains',     '효능분류번호'),
+    'atc':     ('atc__istartswith',    'ATC분류'),
+    'wfco':    ('wfco__startswith',    'wfco'),
+}
+
+
 def search_view(request):
     """
-    상품명으로 동일성분 찾기.
-    - Table 1: medicines_medicine 에서 htname(상품명) 검색
+    medicines_medicine 에서 여러 조건으로 동일성분 찾기.
+    - Table 1: stype/sval 로 medicines_medicine 검색 (6가지 검색 종류)
     - Table 2: Table 1 행 선택 → wfco 앞 6자리로 med_interaction_mfname 검색
     - Table 3: Table 2 행 선택 → wfco 전체(10자리)로 medicines_medicine 검색
     모든 테이블: ypri24 내림차순 정렬, 합계 표시
     """
-    htname_q = request.GET.get('htname', '').strip()
+    stype = request.GET.get('stype', 'htname').strip()
+    if stype not in SEARCH_TYPES:
+        stype = 'htname'
+    sval = request.GET.get('sval', '').strip()
+
+    # 하위호환: 기존 htname 파라미터 지원
+    if not sval:
+        legacy = request.GET.get('htname', '').strip()
+        if legacy:
+            sval = legacy
+            stype = 'htname'
+
     wfco6 = request.GET.get('wfco6', '').strip()     # Table1 행 선택 시 wfco 앞 6자리
     wfco_t1 = request.GET.get('wfco_t1', '').strip() # Table1 선택 행의 wfco 전체(Table2 하이라이트용)
     wfco_full = request.GET.get('wfco', '').strip()   # Table2 행 선택 시 wfco 전체
     sort3_raw = request.GET.get('sort3', '')          # Table 3 정렬 기준
     sort3 = sort3_raw if sort3_raw in ('htname', 'company', 'ypri24') else 'ypri24'
 
-    # ── Table 1: 상품명 검색 ────────────────────────────────────────────────
+    # ── Table 1: 검색 ────────────────────────────────────────────────────────
     table1_page = None
     table1_ypri24_total = ''
-    if htname_q:
+    if sval:
+        field_lookup, _ = SEARCH_TYPES[stype]
         qs1 = _annotate_ypri24(
-            MedicinesMedicine.objects.filter(htname__icontains=htname_q)
+            MedicinesMedicine.objects.filter(**{field_lookup: sval})
         ).order_by('wfco', 'id')
         table1_ypri24_total = _ypri24_total(qs1)
         p1 = Paginator(qs1, PAGE_SIZE)
@@ -105,7 +127,9 @@ def search_view(request):
         auto_focus = 'table2-section'
 
     return render(request, 'equiv_htname/search.html', {
-        'htname_q': htname_q,
+        'stype': stype,
+        'sval': sval,
+        'search_types': SEARCH_TYPES,
         'wfco6': wfco6,
         'wfco_t1': wfco_t1,
         'wfco_full': wfco_full,
