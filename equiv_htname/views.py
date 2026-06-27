@@ -21,6 +21,19 @@ def _format_amount(value):
         return text
 
 
+def _format_ypri24_cell(value):
+    text = str(value or '').strip()
+    if not text:
+        return '-'
+    normalized = text.replace(',', '')
+    try:
+        if Decimal(normalized) == 0:
+            return '-'
+    except (InvalidOperation, ValueError):
+        pass
+    return _format_amount(value)
+
+
 def _annotate_ypri24(qs):
     """ypri24(CharField) → ypri24_num(IntegerField) 어노테이션 추가."""
     return qs.annotate(
@@ -37,7 +50,7 @@ def _ypri24_total(qs):
 
 def _set_ypri24_display(page):
     for row in page.object_list:
-        row.ypri24_display = _format_amount(row.ypri24)
+        row.ypri24_display = _format_ypri24_cell(row.ypri24)
 
 
 def search_view(request):
