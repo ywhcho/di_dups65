@@ -185,6 +185,9 @@
     &nbsp;<small style="font-size:13px;color:#6c757d;">wfco: <strong>{{ wfco_full }}</strong></small>
     {% if table3_ypri24_total %}&nbsp;<small style="font-size:13px;color:#6c757d;">년생산액 합계: <strong>{{ table3_ypri24_total }}</strong></small>{% endif %}
   </h3>
+  {% if table3_header %}
+  <div class="table3-header-meta">활성성분코드(wfco): <strong>{{ table3_header.wfco }}</strong>, 성분명(ingr_t): <strong>{{ table3_header.ingr_t|default:'-' }}</strong></div>
+  {% endif %}
   {% if table3_page.object_list %}
   <table>
     <thead>
@@ -252,6 +255,13 @@ tr.t2-exact-match td {
 }
 tr.t2-exact-match:hover td {
   background: #9fc2ee !important;
+}
+
+.table3-header-meta {
+  display: block;
+  font-size: 13px;
+  color: #6c757d;
+  margin-top: 4px;
 }
 </style>
 

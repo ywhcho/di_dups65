@@ -80,10 +80,18 @@ def search_view(request):
     # ── Table 3: wfco 전체(10자리) 비교 ─────────────────────────────────────
     table3_page = None
     table3_ypri24_total = ''
+    table3_header = None
     if wfco_full:
-        qs3 = _annotate_ypri24(
-            MedicinesMedicine.objects.filter(wfco=wfco_full)
-        ).order_by('-ypri24_num', 'id')
+        qs3_base = MedicinesMedicine.objects.filter(wfco=wfco_full)
+        table3_header = MedInteractionMfname.objects.filter(wfco=wfco_full).values('wfco', 'ingr_t').first()
+        if not table3_header:
+            table3_header = qs3_base.values('wfco', 'ingr_t').first()
+        if table3_header:
+            table3_header = {
+                'wfco': table3_header.get('wfco') or wfco_full,
+                'ingr_t': table3_header.get('ingr_t') or '',
+            }
+        qs3 = _annotate_ypri24(qs3_base).order_by('-ypri24_num', 'id')
         table3_ypri24_total = _ypri24_total(qs3)
         p3 = Paginator(qs3, PAGE_SIZE)
         table3_page = p3.get_page(request.GET.get('page3', 1))
@@ -106,6 +114,7 @@ def search_view(request):
         'table2_page': table2_page,
         'table2_ypri24_total': table2_ypri24_total,
         'table3_page': table3_page,
+        'table3_header': table3_header,
         'table3_ypri24_total': table3_ypri24_total,
         'auto_focus': auto_focus,
     })
