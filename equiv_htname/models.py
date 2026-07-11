@@ -8,7 +8,7 @@ class MedicinesMedicine(models.Model):
     """
     wfco = models.CharField('활성성분코드', max_length=20, blank=True, default='')
     htname = models.CharField('약품명', max_length=255, blank=True, default='')
-    ee = models.CharField('효능', max_length=500, blank=True, default='')
+    ee = models.TextField('효능', blank=True, default='')
     ingr_t = models.CharField('성분명', max_length=255, blank=True, default='')
     company = models.CharField('회사', max_length=255, blank=True, default='')
     cfno = models.CharField('효능분류', max_length=20, blank=True, default='')
