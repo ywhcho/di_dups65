@@ -77,6 +77,8 @@ def search_view(request):
     wfco6 = request.GET.get('wfco6', '').strip()
     wfco_t1 = request.GET.get('wfco_t1', '').strip()
     wfco_full = request.GET.get('wfco', '').strip()
+    sort1_raw = request.GET.get('sort1', '')
+    sort1 = sort1_raw if sort1_raw in ('htname', 'company', 'ypri24') else 'ypri24'
     sort3_raw = request.GET.get('sort3', '')
     sort3 = sort3_raw if sort3_raw in ('htname', 'company', 'ypri24') else 'ypri24'
 
@@ -85,9 +87,15 @@ def search_view(request):
     table1_ypri24_total = ''
     if sval:
         field_lookup, _ = SEARCH_TYPES[stype]
+        _sort1_map = {
+            'htname': ('htname', 'id'),
+            'company': ('company', 'id'),
+            'ypri24': ('-ypri24_num', 'id'),
+        }
+        t1_order = _sort1_map[sort1]
         qs1 = _annotate_ypri24(
             MedicinesMedicine.objects.filter(**{field_lookup: sval})
-        ).order_by('wfco', 'id')
+        ).order_by(*t1_order)
         table1_ypri24_total = _ypri24_total(qs1)
         p1 = Paginator(qs1, PAGE_SIZE)
         table1_page = p1.get_page(request.GET.get('page1', 1))
@@ -99,7 +107,7 @@ def search_view(request):
     if wfco6:
         qs2 = _annotate_ypri24(
             MedInteractionMfname.objects.filter(wfco__startswith=wfco6)
-        ).order_by('wfco', 'id')
+        ).order_by('-ypri24_num', 'id')
         table2_ypri24_total = _ypri24_total(qs2)
         p2 = Paginator(qs2, PAGE_SIZE)
         table2_page = p2.get_page(request.GET.get('page2', 1))
@@ -136,6 +144,7 @@ def search_view(request):
         'wfco6': wfco6,
         'wfco_t1': wfco_t1,
         'wfco_full': wfco_full,
+        'sort1': sort1,
         'sort3': sort3,
         'table1_page': table1_page,
         'table1_ypri24_total': table1_ypri24_total,
