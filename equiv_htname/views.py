@@ -36,9 +36,17 @@ def _ypri24_total(qs):
     return _format_amount(str(agg['total'])) if agg['total'] else ''
 
 
+def _ypri24_display(value):
+    """ypri24 표시용: 빈 값이나 0이면 '-' 반환."""
+    formatted = _format_amount(value)
+    if not formatted or formatted == '0':
+        return '-'
+    return formatted
+
+
 def _set_ypri24_display(page):
     for row in page.object_list:
-        row.ypri24_display = _format_amount(row.ypri24)
+        row.ypri24_display = _ypri24_display(row.ypri24)
 
 
 # 검색 타입 정의: (필드 조회식, 표시명)
@@ -131,11 +139,14 @@ def search_view(request):
         table3_page = p3.get_page(request.GET.get('page3', 1))
         _set_ypri24_display(table3_page)
 
-    auto_focus = ''
+    # ── Table 3: ee/ingr_t 공통값 (header 표시용) ───────────────────────────
+    table3_ee = ''
+    table3_ingr_t = ''
     if wfco_full:
-        auto_focus = 'table3-section'
-    elif wfco6:
-        auto_focus = 'table2-section'
+        first_row = qs3.first()
+        if first_row:
+            table3_ee = first_row.ee
+            table3_ingr_t = first_row.ingr_t
 
     return render(request, 'equiv_htname/search.html', {
         'stype': stype,
@@ -152,7 +163,8 @@ def search_view(request):
         'table2_ypri24_total': table2_ypri24_total,
         'table3_page': table3_page,
         'table3_ypri24_total': table3_ypri24_total,
-        'auto_focus': auto_focus,
+        'table3_ee': table3_ee,
+        'table3_ingr_t': table3_ingr_t,
     })
 
 
@@ -172,7 +184,7 @@ def druginfo_detail(request):
             'htname': row.htname,
             'ingr_t': row.ingr_t,
             'sthunite_t': row.sthunite_t,
-            'ypri24': _format_amount(row.ypri24),
+            'ypri24': _ypri24_display(row.ypri24),
             'company': row.company,
             'kfregcd': row.kfregcd,
             'ee': row.ee,
