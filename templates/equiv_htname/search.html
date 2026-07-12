@@ -51,6 +51,7 @@
         <th>효능분류 (cfno)</th>
         <th>ATC분류 (atc)</th>
         <th style="text-align:right;"><a href="?stype={{ stype|urlencode }}&sval={{ sval|urlencode }}&wfco6={{ wfco6|urlencode }}&wfco_t1={{ wfco_t1|urlencode }}&wfco={{ wfco_full|urlencode }}&page1=1&page2={{ request.GET.page2|default:1 }}&page3={{ request.GET.page3|default:1 }}&sort1=ypri24&sort3={{ sort3 }}#table1-section" class="sort-link">연생산실적 (ypri24){% if sort1 == 'ypri24' %} ▼{% endif %}</a></th>
+        <th>의약정보</th>
       </tr>
     </thead>
     <tbody>
@@ -73,6 +74,9 @@
         <td>{{ row.cfno }}</td>
         <td>{{ row.atc }}</td>
         <td style="text-align:right;">{{ row.ypri24_display }}</td>
+        <td>
+          <button class="di-btn" data-htname="{{ row.htname|escapejs }}" title="의약정보 보기">DI</button>
+        </td>
       </tr>
       {% endwith %}
       {% endfor %}
