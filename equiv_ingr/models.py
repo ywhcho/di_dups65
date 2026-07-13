@@ -46,3 +46,26 @@ class MedicinesMedicine(models.Model):
 
     def __str__(self):
         return f"{self.htname} ({self.wfco})"
+
+
+class MedicinesDruginfo(models.Model):
+    """
+    DB: medicines_druginfo
+    DI 버튼 클릭 시 의약정보 상세 팝업에 사용
+    """
+    htname = models.CharField('약품명', max_length=255, blank=True, default='')
+    ingr_t = models.CharField('성분명', max_length=500, blank=True, default='')
+    sthunite_t = models.CharField('함량', max_length=255, blank=True, default='')
+    ypri24 = models.CharField('연생산액', max_length=50, blank=True, default='')
+    company = models.CharField('회사명', max_length=255, blank=True, default='')
+    kfregcd = models.CharField('품목기준코드', max_length=50, blank=True, default='')
+    ee = models.TextField('효능', blank=True, default='')
+    ud = models.TextField('용량', blank=True, default='')
+    nb = models.TextField('주의사항', blank=True, default='')
+
+    class Meta:
+        db_table = 'medicines_druginfo'
+        managed = False
+
+    def __str__(self):
+        return f"{self.htname}"

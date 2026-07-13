@@ -1,12 +1,13 @@
 from urllib.parse import urlencode
 
 from django.core.paginator import Paginator
+from django.http import JsonResponse
 from django.shortcuts import render
 from decimal import Decimal, InvalidOperation
 from django.db.models import IntegerField, Sum, Value
 from django.db.models.functions import Cast, Coalesce, Replace
 
-from .models import MedInteractionMfname, MedicinesMedicine
+from .models import MedInteractionMfname, MedicinesDruginfo, MedicinesMedicine
 
 PAGE_SIZE = 10
 
@@ -81,10 +82,14 @@ def search_view(request):
 
     table2_page = None
     table2_ypri24_total = None
+    table2_ingred = ''
     if wfco_full:
         qs2 = _get_table2_queryset(wfco_full, sort2)
         agg = qs2.aggregate(total=Coalesce(Sum('ypri24_num'), Value(0), output_field=IntegerField()))
         table2_ypri24_total = _format_amount(str(agg['total'])) if agg['total'] else ''
+        first_row = qs2.first()
+        if first_row:
+            table2_ingred = first_row.ingred
         p2 = Paginator(qs2, PAGE_SIZE)
         table2_page = p2.get_page(request.GET.get('page2', 1))
         for row in table2_page.object_list:
@@ -100,8 +105,35 @@ def search_view(request):
         'table1_page': table1_page,
         'table2_page': table2_page,
         'table2_ypri24_total': table2_ypri24_total,
+        'table2_ingred': table2_ingred,
         'table2_sort_links': _get_table2_sort_links(query_type, query_val, wfco_full, request.GET.get('page1', 1)),
         'wfco_full': wfco_full,
         'sort2': sort2,
         'auto_focus': auto_focus,
     })
+
+
+def druginfo_detail(request):
+    """
+    di 버튼 클릭 시 medicines_druginfo 테이블에서 의약정보를 조회하여 JSON 반환.
+    ?htname=... 파라미터로 검색
+    """
+    htname = request.GET.get('htname', '').strip()
+    if not htname:
+        return JsonResponse({'results': []})
+
+    rows = MedicinesDruginfo.objects.filter(htname=htname)
+    results = []
+    for row in rows:
+        results.append({
+            'htname': row.htname,
+            'ingr_t': row.ingr_t,
+            'sthunite_t': row.sthunite_t,
+            'ypri24': _format_amount(row.ypri24),
+            'company': row.company,
+            'kfregcd': row.kfregcd,
+            'ee': row.ee,
+            'ud': row.ud,
+            'nb': row.nb,
+        })
+    return JsonResponse({'results': results})
